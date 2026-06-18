@@ -1,15 +1,18 @@
 // src/lib/auth.ts
-// Cookie-based PIN session. No Supabase auth involved.
+// Cookie-based PIN session. Uses Web Crypto API (Edge + Node compatible).
 
-import { createHash } from 'crypto';
 import { cookies } from 'next/headers';
 import type { NextRequest } from 'next/server';
 
 export const SESSION_COOKIE = '__bills_session';
 
-function makeToken(pin: string): string {
+async function makeToken(pin: string): Promise<string> {
   const salt = process.env.NEXT_PUBLIC_SUPABASE_URL ?? 'bills-app';
-  return createHash('sha256').update(`${pin}:${salt}`).digest('hex');
+  const data = new TextEncoder().encode(`${pin}:${salt}`);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  return Array.from(new Uint8Array(hashBuffer))
+    .map((b) => b.toString(16).padStart(2, '0'))
+    .join('');
 }
 
 export async function isAuthenticated(): Promise<boolean> {
@@ -17,24 +20,24 @@ export async function isAuthenticated(): Promise<boolean> {
   if (!pin) return false;
   const store = await cookies();
   const value = store.get(SESSION_COOKIE)?.value;
-  return value === makeToken(pin);
+  return value === (await makeToken(pin));
 }
 
-export function isAuthenticatedRequest(request: NextRequest): boolean {
+export async function isAuthenticatedRequest(request: NextRequest): Promise<boolean> {
   const pin = process.env.ADMIN_PIN;
   if (!pin) return false;
   const value = request.cookies.get(SESSION_COOKIE)?.value;
-  return value === makeToken(pin);
+  return value === (await makeToken(pin));
 }
 
 export async function setSession(pin: string): Promise<void> {
   const store = await cookies();
-  store.set(SESSION_COOKIE, makeToken(pin), {
+  store.set(SESSION_COOKIE, await makeToken(pin), {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
     path: '/',
-    maxAge: 60 * 60 * 24 * 30, // 30 days
+    maxAge: 60 * 60 * 24 * 30,
   });
 }
 

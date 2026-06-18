@@ -4,7 +4,7 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { isAuthenticatedRequest } from '@/lib/auth';
 
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   const isPublic =
@@ -14,7 +14,7 @@ export function middleware(request: NextRequest) {
 
   if (isPublic) return NextResponse.next();
 
-  if (!isAuthenticatedRequest(request)) {
+  if (!(await isAuthenticatedRequest(request))) {
     return NextResponse.redirect(new URL('/login', request.url));
   }
 
