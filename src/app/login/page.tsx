@@ -1,10 +1,7 @@
 'use client';
 
 // src/app/login/page.tsx
-// Magic-code sign-in. Mirrors mockups/screens/1-login.html: brand wordmark,
-// "Sign in" header, "welcome back" subtitle, single email field + cta-inline
-// "Send magic code" button. Uses body class="login-page" by toggling the
-// class at mount/unmount so the editor pages keep their default chrome.
+// Email + password sign-in. Single-account admin login.
 
 import {
   useEffect,
@@ -20,10 +17,10 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Body chrome — login-page bg + flex-center, only on this route.
   useEffect(() => {
     document.body.classList.add('login-page');
     return () => {
@@ -31,9 +28,18 @@ export default function LoginPage() {
     };
   }, []);
 
+  const clearError = () => {
+    if (error) setError(null);
+  };
+
   const handleEmailChange = (e: ChangeEvent<HTMLInputElement>) => {
     setEmail(e.target.value);
-    if (error) setError(null);
+    clearError();
+  };
+
+  const handlePasswordChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setPassword(e.target.value);
+    clearError();
   };
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
@@ -45,27 +51,32 @@ export default function LoginPage() {
       setError('Please enter a valid email address.');
       return;
     }
+    if (!password) {
+      setError('Please enter your password.');
+      return;
+    }
 
     setPending(true);
     setError(null);
 
     try {
       const supabase = createClient();
-      const { error: otpError } = await supabase.auth.signInWithOtp({
+      const { error: signInError } = await supabase.auth.signInWithPassword({
         email: trimmed,
-        options: { shouldCreateUser: true },
+        password,
       });
-      if (otpError) {
-        setError(otpError.message);
+      if (signInError) {
+        setError(signInError.message);
         setPending(false);
         return;
       }
-      router.push(`/verify?email=${encodeURIComponent(trimmed)}`);
+      router.replace('/');
+      router.refresh();
     } catch (err) {
       setError(
         err instanceof Error
           ? err.message
-          : 'Could not send code. Try again in a moment.',
+          : 'Could not sign in. Try again in a moment.',
       );
       setPending(false);
     }
@@ -96,28 +107,34 @@ export default function LoginPage() {
           aria-invalid={error ? 'true' : undefined}
           aria-label="Email address"
         />
+        <input
+          type="password"
+          name="password"
+          value={password}
+          onChange={handlePasswordChange}
+          placeholder="Password"
+          autoComplete="current-password"
+          disabled={pending}
+          aria-invalid={error ? 'true' : undefined}
+          aria-label="Password"
+          style={{ marginTop: 12 }}
+        />
         <button
           type="submit"
           className="cta-inline"
-          disabled={pending || !email.trim()}
+          disabled={pending || !email.trim() || !password}
         >
-          {pending ? 'Sending…' : 'Send magic code'}
+          {pending ? 'Signing in…' : 'Sign in'}
         </button>
-        <div
-          className="login-helper"
-          role={error ? 'alert' : undefined}
-          style={error ? { color: 'var(--accent)' } : undefined}
-        >
-          {error ? (
-            error
-          ) : (
-            <>
-              We&apos;ll email you a 6-digit verification code.
-              <br />
-              No password needed.
-            </>
-          )}
-        </div>
+        {error ? (
+          <div
+            className="login-helper"
+            role="alert"
+            style={{ color: 'var(--accent)' }}
+          >
+            {error}
+          </div>
+        ) : null}
       </form>
     </div>
   );
