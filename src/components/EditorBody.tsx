@@ -40,7 +40,6 @@ import {
   setOverride as setOverrideAction,
 } from '@/actions/roommates';
 import { generateShareLinks } from '@/actions/share';
-import { createNextCycle } from '@/actions/cycles';
 import { formatCycleLabel } from '@/lib/format';
 
 export interface EditorBodyProps {
@@ -335,23 +334,11 @@ export default function EditorBody({
 
   // ---- render ----------------------------------------------------------------
   const monthName = formatCycleLabel(cycle.year, cycle.month).split(' ')[0];
-  const [addingMonth, startAddMonth] = useTransition();
 
   return (
     <>
       <div className="header">
         <h1>{monthName}</h1>
-        <button
-          type="button"
-          className="share-fab"
-          aria-label="Add next month"
-          disabled={addingMonth}
-          onClick={() => {
-            startAddMonth(() => { void createNextCycle(); });
-          }}
-        >
-          {addingMonth ? '…' : '+'}
-        </button>
       </div>
 
       <div className="section">
