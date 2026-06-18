@@ -420,6 +420,3 @@ export default function EditorBody({
     </>
   );
 }
-    </>
-  );
-}
