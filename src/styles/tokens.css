@@ -7,10 +7,10 @@
   /* Color tokens */
   --canvas: #ffffff;
   --page: #f5f5f4;
-  --ink: #1a1a1a;
+  --ink: #222222;
   --body: #3f3f3f;
-  --muted: #737373;
-  --muted-soft: #a3a3a3;
+  --muted: #6a6a6a;
+  --muted-soft: #929292;
   --hairline: #e5e5e5;
   --hairline-soft: #f0f0f0;
   --surface-soft: #fafafa;
@@ -27,8 +27,8 @@
   /* Shadows */
   --shadow-card:
     rgba(0, 0, 0, 0.02) 0 0 0 1px,
-    rgba(0, 0, 0, 0.04) 0 2px 6px,
-    rgba(0, 0, 0, 0.06) 0 4px 8px;
+    rgba(0, 0, 0, 0.04) 0 2px 6px 0,
+    rgba(0, 0, 0, 0.1) 0 4px 8px 0;
   --shadow-cta: 0 4px 14px rgba(255, 56, 92, 0.22);
   --shadow-modal: 0 20px 60px rgba(0, 0, 0, 0.3);
   --shadow-paper:
@@ -48,11 +48,11 @@
   --share-max: 560px;
   --login-max: 380px;
   --modal-max: 480px;
-  --radius-card: 24px;
-  --radius-summary: 22px;
-  --radius-message: 18px;
+  --radius-card: 16px;
+  --radius-summary: 16px;
+  --radius-message: 12px;
   --radius-pill: 9999px;
-  --radius-input: 16px;
+  --radius-input: 8px;
 }
 
 /* ===== Editor / Share shells =============================================== */
@@ -189,11 +189,11 @@
 .cycle-label-edit:focus { color: var(--ink); }
 
 h1 {
-  font-size: 40px;
-  font-weight: 800;
-  font-variation-settings: 'wght' 800;
-  letter-spacing: -1.2px;
-  line-height: 1.05;
+  font-size: 32px;
+  font-weight: 700;
+  font-variation-settings: 'wght' 700;
+  letter-spacing: -0.8px;
+  line-height: 1.1;
 }
 
 /* ===== Sections =========================================================== */
@@ -429,6 +429,7 @@ h1 {
 
 .summary-total { font-size: 14px; color: var(--muted); font-weight: 500; }
 .summary-total b { color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
+.summary-total-amount { color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
 
 .summary-each-line {
   display: flex;
@@ -446,6 +447,7 @@ h1 {
   letter-spacing: -2.2px;
   line-height: 1;
   font-variant-numeric: tabular-nums;
+  color: var(--ink);
 }
 .summary-each.empty { color: var(--muted-soft); }
 
