@@ -197,14 +197,14 @@ function VerifyForm() {
       </div>
 
       <div className="login-form">
-        <div className="otp-input">
+        <div className="otp-row">
           {digits.map((d, i) => (
             <input
               key={i}
               ref={(el) => {
                 inputsRef.current[i] = el;
               }}
-              className={d ? 'otp-digit filled' : 'otp-digit'}
+              className={d ? 'otp-input filled' : 'otp-input'}
               type="text"
               inputMode="numeric"
               autoComplete={i === 0 ? 'one-time-code' : 'off'}
