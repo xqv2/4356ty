@@ -65,6 +65,7 @@ export async function ensureCurrentCycle(): Promise<Cycle> {
     await supabase.from('roommates').insert([
       { user_id: userId, name: 'Lokesh',  position: 0 },
       { user_id: userId, name: 'Astitva', position: 1 },
+      { user_id: userId, name: 'Bob',     position: 2 },
     ]);
   }
 
