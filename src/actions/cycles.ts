@@ -101,9 +101,16 @@ export async function ensureCurrentCycle(): Promise<Cycle> {
   // Resolve Lokesh's id for discount seeding.
   const { data: allRoommates } = await supabase
     .from('roommates')
-    .select('id, name')
+    .select('id, name, position')
     .eq('user_id', userId)
     .is('archived_at', null);
+
+  // Ensure Johny exists (may have been missing from old seed).
+  const johnyExists = allRoommates?.some((r) => r.name === 'Johny');
+  if (!johnyExists) {
+    const maxPos = allRoommates?.reduce((m, r) => Math.max(m, r.position ?? 0), 0) ?? 0;
+    await supabase.from('roommates').insert({ user_id: userId, name: 'Johny', position: maxPos + 1 });
+  }
 
   const lokeshId = allRoommates?.find((r) => r.name === 'Lokesh')?.id ?? null;
 
