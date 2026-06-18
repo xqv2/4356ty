@@ -505,6 +505,14 @@ h1 {
   flex-shrink: 0;
 }
 
+.roommate-name-wrap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  flex: 1;
+}
+
 .roommate-name-edit {
   font-size: 15px;
   font-weight: 500;
@@ -516,6 +524,8 @@ h1 {
   font-family: var(--sans);
   min-width: 0;
   width: auto;
+  max-width: 140px;
+  flex-shrink: 1;
 }
 
 .override-pill {

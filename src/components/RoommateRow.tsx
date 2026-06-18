@@ -86,21 +86,23 @@ export default function RoommateRow({
     <div className="roommate-row">
       <div className="roommate-left">
         <div className="roommate-avatar">{initialOf(name)}</div>
-        <input
-          className="roommate-name-edit"
-          type="text"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          onBlur={commitName}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') (e.target as HTMLInputElement).blur();
-            if (e.key === 'Escape') { setName(roommate.name); (e.target as HTMLInputElement).blur(); }
-          }}
-          aria-label="Roommate name"
-        />
-        {hasPercent && <span className="discount-pill">{`−${split.override_percent}%`}</span>}
-        {hasCents && !hasPercent && <span className="override-pill">override</span>}
-        {!hasPercent && !hasCents && isLandlord && <span className="tag-pill">landlord</span>}
+        <div className="roommate-name-wrap">
+          <input
+            className="roommate-name-edit"
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            onBlur={commitName}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') (e.target as HTMLInputElement).blur();
+              if (e.key === 'Escape') { setName(roommate.name); (e.target as HTMLInputElement).blur(); }
+            }}
+            aria-label="Roommate name"
+          />
+          {hasPercent && <span className="discount-pill">{`−${split.override_percent}%`}</span>}
+          {hasCents && !hasPercent && <span className="override-pill">override</span>}
+          {!hasPercent && !hasCents && isLandlord && <span className="tag-pill">landlord</span>}
+        </div>
       </div>
 
       <div className="roommate-right">
