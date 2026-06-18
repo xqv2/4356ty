@@ -7,6 +7,7 @@ import type { AnimalKey, ShareLinkOutput, UUID } from '@/lib/types';
 import { POOL, pickAnimals } from '@/lib/animals';
 import { createServiceClient, getAdminUserId } from '@/lib/supabase/service';
 import { expiryFromNow, mintToken } from '@/lib/tokens';
+import { shortenUrl } from '@/lib/tinyurl';
 
 export async function generateShareLinks(cycleId: UUID): Promise<ShareLinkOutput[]> {
   const supabase = createServiceClient();
@@ -115,7 +116,7 @@ export async function generateShareLinks(cycleId: UUID): Promise<ShareLinkOutput
 
   const baseUrl = resolveBaseUrl();
 
-  return list.map((r) => {
+  const rawResults = list.map((r) => {
     const token = tokenByRoommate.get(r.id as UUID) ?? '';
     const animal = (animalByRoommate.get(r.id as UUID) ?? POOL[0]!) as AnimalKey;
     const existing = existingByRoommate.get(r.id as UUID);
@@ -125,12 +126,24 @@ export async function generateShareLinks(cycleId: UUID): Promise<ShareLinkOutput
       roommateId: r.id as UUID,
       name: r.name,
       token,
-      url: `${baseUrl}/share/${token}`,
+      longUrl: `${baseUrl}/share/${token}`,
       animal,
       amount_cents: 0,
       is_discounted: isDiscounted,
     };
   });
+
+  const shortUrls = await Promise.all(rawResults.map((r) => shortenUrl(r.longUrl)));
+
+  return rawResults.map((r, i) => ({
+    roommateId: r.roommateId,
+    name: r.name,
+    token: r.token,
+    url: shortUrls[i] ?? r.longUrl,
+    animal: r.animal,
+    amount_cents: r.amount_cents,
+    is_discounted: r.is_discounted,
+  }));
 }
 
 export async function revokeShareLinks(cycleId: UUID): Promise<void> {
