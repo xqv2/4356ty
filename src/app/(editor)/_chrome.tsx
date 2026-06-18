@@ -20,9 +20,10 @@ const CYCLE_ID_RE = /^\/cycle\/([^/]+)/;
 export interface EditorChromeProps {
   cycles: Cycle[];
   children: ReactNode;
+  onAddNextMonth?: () => Promise<void>;
 }
 
-export default function EditorChrome({ cycles, children }: EditorChromeProps) {
+export default function EditorChrome({ cycles, children, onAddNextMonth }: EditorChromeProps) {
   const pathname = usePathname() || '/';
 
   useEffect(() => {
@@ -41,7 +42,7 @@ export default function EditorChrome({ cycles, children }: EditorChromeProps) {
 
   return (
     <div className="editor-shell">
-      <MonthTabs cycles={cycles} activeId={activeId} />
+      <MonthTabs cycles={cycles} activeId={activeId} onAddNextMonth={onAddNextMonth} />
       <div className="app">{children}</div>
     </div>
   );
