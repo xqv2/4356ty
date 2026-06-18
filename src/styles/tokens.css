@@ -340,6 +340,13 @@ h1 {
 /* hidden file input that PdfButton wraps around */
 .pdf-input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
 
+.roommate-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
 .row-end {
   display: flex;
   align-items: center;
@@ -348,27 +355,29 @@ h1 {
 }
 
 .row-delete {
+  -webkit-appearance: none;
+  appearance: none;
   border: none;
-  background: none;
+  background: transparent;
   color: var(--muted-soft);
   cursor: pointer;
   font-size: 18px;
   padding: 0;
   line-height: 1;
-  width: 44px;
-  height: 44px;
+  width: 36px;
+  height: 36px;
   display: grid;
   place-items: center;
   border-radius: 50%;
   opacity: 0;
   transition: opacity 0.15s, color 0.15s;
-  margin: -10px -10px -10px 0;
+  flex-shrink: 0;
 }
 .bill-card:hover .row-delete,
 .roommate-row:hover .row-delete,
 .bill-card .row-delete:focus,
 .roommate-row .row-delete:focus { opacity: 1; }
-.row-delete:hover { color: var(--accent); background: var(--surface-soft); }
+.row-delete:hover { color: var(--accent); }
 
 .msg-copy-btn {
   border: none;
@@ -396,24 +405,27 @@ h1 {
 
 .add-bill,
 .add-roommate {
-  border: none;
-  background: none;
+  -webkit-appearance: none;
+  appearance: none;
+  border: 1.5px solid var(--hairline);
+  background: transparent;
   color: var(--muted);
   cursor: pointer;
-  font-size: 22px;
-  font-weight: 300;
-  width: 44px;
-  height: 44px;
+  font-size: 18px;
+  font-weight: 400;
+  width: 32px;
+  height: 32px;
   display: grid;
   place-items: center;
   border-radius: 50%;
   padding: 0;
   line-height: 1;
   flex-shrink: 0;
+  -webkit-tap-highlight-color: transparent;
 }
 .add-bill:hover,
 .add-roommate:hover {
-  background: var(--surface-soft);
+  border-color: var(--ink);
   color: var(--ink);
 }
 
@@ -498,11 +510,14 @@ h1 {
 }
 
 .override-pill {
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 600;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
   color: var(--accent);
+  margin-left: 6px;
+  background: rgba(255, 56, 92, 0.08);
+  padding: 2px 7px;
+  border-radius: 4px;
+}
   margin-left: 8px;
   background: rgba(255, 56, 92, 0.08);
   padding: 2px 6px;

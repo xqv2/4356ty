@@ -2,8 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import type { CycleSplit, Roommate } from '@/lib/types';
-/** Patch shape emitted by RoommateRow. Any subset of these fields may be
- *  passed to onSave. Use `null` to clear an override field. */
+
 export interface RoommateRowPatch {
   name?: string;
   override_cents?: number | null;
@@ -13,7 +12,6 @@ export interface RoommateRowPatch {
 export interface RoommateRowProps {
   roommate: Roommate;
   split: CycleSplit;
-  /** What this roommate owes for the current cycle, after splits + overrides. */
   computedAmountCents: number;
   onSave: (patch: RoommateRowPatch) => void;
   onDelete: () => void;
@@ -21,12 +19,9 @@ export interface RoommateRowProps {
   isLandlord?: boolean;
 }
 
-// ---- helpers ----------------------------------------------------------------
-
 function initialOf(name: string): string {
   const trimmed = name.trim();
   if (!trimmed) return '?';
-  // Grab first code-point so emoji-as-name doesn't blow up.
   const first = Array.from(trimmed)[0] ?? '?';
   return first.toUpperCase();
 }
@@ -39,8 +34,6 @@ function formatCents(cents: number): string {
   return `${sign}$${dollars}.${remainder.toString().padStart(2, '0')}`;
 }
 
-/** Parses "$1,234.56" / "1234.56" / "  12 " / "" -> integer cents.
- *  Returns null when the input is empty or unparseable (caller treats as no-op). */
 function parseCents(raw: string): number | null {
   const cleaned = raw.replace(/[^0-9.\-]/g, '').trim();
   if (!cleaned) return null;
@@ -48,8 +41,6 @@ function parseCents(raw: string): number | null {
   if (!Number.isFinite(num)) return null;
   return Math.round(num * 100);
 }
-
-// ---- component --------------------------------------------------------------
 
 export default function RoommateRow({
   roommate,
@@ -60,19 +51,14 @@ export default function RoommateRow({
   onCopyMessage,
   isLandlord,
 }: RoommateRowProps) {
-  // Local-controlled name so typing feels instant; commit on blur / Enter.
   const [name, setName] = useState(roommate.name);
   useEffect(() => setName(roommate.name), [roommate.name]);
 
   const [copied, setCopied] = useState(false);
 
-  const hasPercent =
-    split.override_percent !== null && split.override_percent !== undefined;
-  const hasCents =
-    split.override_cents !== null && split.override_cents !== undefined;
+  const hasPercent = split.override_percent !== null && split.override_percent !== undefined;
+  const hasCents = split.override_cents !== null && split.override_cents !== undefined;
 
-  // Override input is shown whenever any override is set; its draft value is
-  // local so typing doesn't fight the parent's optimistic state.
   const [overrideDraft, setOverrideDraft] = useState<string>(() =>
     hasCents ? formatCents(split.override_cents as number) : formatCents(computedAmountCents),
   );
@@ -80,26 +66,19 @@ export default function RoommateRow({
     if (hasCents) {
       setOverrideDraft(formatCents(split.override_cents as number));
     } else if (hasPercent) {
-      // For percent overrides the input mirrors the computed amount.
       setOverrideDraft(formatCents(computedAmountCents));
     }
   }, [hasCents, hasPercent, split.override_cents, computedAmountCents]);
 
   function commitName() {
     const next = name.trim();
-    if (!next || next === roommate.name) {
-      setName(roommate.name);
-      return;
-    }
+    if (!next || next === roommate.name) { setName(roommate.name); return; }
     onSave({ name: next });
   }
 
   function commitOverride() {
     const cents = parseCents(overrideDraft);
     if (cents === null) return;
-    // Editing the override input always means an explicit cents override
-    // (a percent override edited numerically converts into cents; the parent
-    // can choose to interpret a near-equal-share value as "clear" if it wants).
     onSave({ override_cents: cents, override_percent: null });
   }
 
@@ -115,20 +94,67 @@ export default function RoommateRow({
           onBlur={commitName}
           onKeyDown={(e) => {
             if (e.key === 'Enter') (e.target as HTMLInputElement).blur();
-            if (e.key === 'Escape') {
-              setName(roommate.name);
-              (e.target as HTMLInputElement).blur();
-            }
+            if (e.key === 'Escape') { setName(roommate.name); (e.target as HTMLInputElement).blur(); }
           }}
           aria-label="Roommate name"
         />
-        {hasPercent && (
-          <span className="discount-pill">{`−${split.override_percent}%`}</span>
-        )}
+        {hasPercent && <span className="discount-pill">{`−${split.override_percent}%`}</span>}
         {hasCents && !hasPercent && <span className="override-pill">override</span>}
-        {!hasPercent && !hasCents && isLandlord && (
-          <span className="tag-pill">landlord</span>
+        {!hasPercent && !hasCents && isLandlord && <span className="tag-pill">landlord</span>}
+      </div>
+
+      <div className="roommate-right">
+        {hasPercent || hasCents ? (
+          <input
+            className="override-input"
+            type="text"
+            inputMode="decimal"
+            value={overrideDraft}
+            onChange={(e) => setOverrideDraft(e.target.value)}
+            onBlur={commitOverride}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') (e.target as HTMLInputElement).blur();
+              if (e.key === 'Escape') {
+                setOverrideDraft(hasCents ? formatCents(split.override_cents as number) : formatCents(computedAmountCents));
+                (e.target as HTMLInputElement).blur();
+              }
+            }}
+            aria-label="Override amount"
+          />
+        ) : (
+          <span className="roommate-amount">{formatCents(computedAmountCents)}</span>
         )}
+
+        {onCopyMessage && (
+          <button
+            type="button"
+            className={copied ? 'msg-copy-btn copied' : 'msg-copy-btn'}
+            aria-label={copied ? 'Copied' : `Copy message for ${roommate.name}`}
+            onClick={() => {
+              onCopyMessage();
+              setCopied(true);
+              window.setTimeout(() => setCopied(false), 1600);
+            }}
+          >
+            {copied ? (
+              <>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <path d="M20 6 9 17l-5-5" />
+                </svg>
+                Copied
+              </>
+            ) : (
+              <>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <rect x={9} y={9} width={13} height={13} rx={2} />
+                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                </svg>
+                Copy
+              </>
+            )}
+          </button>
+        )}
+
         <button
           type="button"
           className="row-delete"
@@ -138,62 +164,6 @@ export default function RoommateRow({
           ×
         </button>
       </div>
-
-      {hasPercent || hasCents ? (
-        <input
-          className="override-input"
-          type="text"
-          inputMode="decimal"
-          value={overrideDraft}
-          onChange={(e) => setOverrideDraft(e.target.value)}
-          onBlur={commitOverride}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') (e.target as HTMLInputElement).blur();
-            if (e.key === 'Escape') {
-              setOverrideDraft(
-                hasCents
-                  ? formatCents(split.override_cents as number)
-                  : formatCents(computedAmountCents),
-              );
-              (e.target as HTMLInputElement).blur();
-            }
-          }}
-          aria-label="Override amount"
-        />
-      ) : (
-        <span className="roommate-amount">{formatCents(computedAmountCents)}</span>
-      )}
-
-      {onCopyMessage && (
-        <button
-          type="button"
-          className={copied ? 'msg-copy-btn copied' : 'msg-copy-btn'}
-          title={copied ? 'Copied!' : `Copy message for ${roommate.name}`}
-          aria-label={copied ? 'Copied' : `Copy message for ${roommate.name}`}
-          onClick={() => {
-            onCopyMessage();
-            setCopied(true);
-            window.setTimeout(() => setCopied(false), 1600);
-          }}
-        >
-          {copied ? (
-            <>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                <path d="M20 6 9 17l-5-5" />
-              </svg>
-              Copied
-            </>
-          ) : (
-            <>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                <rect x={9} y={9} width={13} height={13} rx={2} />
-                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
-              </svg>
-              Copy
-            </>
-          )}
-        </button>
-      )}
     </div>
   );
 }
