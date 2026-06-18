@@ -1,6 +1,7 @@
 // src/app/(editor)/layout.tsx
 import type { ReactNode } from 'react';
 import { createServiceClient, getAdminUserId } from '@/lib/supabase/service';
+import { createNextCycle } from '@/actions/cycles';
 import type { Cycle } from '@/lib/types';
 import EditorChrome from './_chrome';
 
@@ -21,5 +22,5 @@ export default async function EditorLayout({
 
   const cycles: Cycle[] = (cyclesData ?? []) as Cycle[];
 
-  return <EditorChrome cycles={cycles}>{children}</EditorChrome>;
+  return <EditorChrome cycles={cycles} onAddNextMonth={createNextCycle}>{children}</EditorChrome>;
 }
