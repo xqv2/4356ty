@@ -69,17 +69,12 @@ export default async function CycleEditorPage({ params }: PageProps) {
   const tokens = (tokensRes.data ?? []) as ShareToken[];
   const activeTokens = tokens.filter((t) => Date.parse(t.expires_at) > Date.now());
 
-  const cycleHeaderLabel = `${formatCycleLabel(cycle.year, cycle.month)} · ${
-    cycle.label?.includes('·')
-      ? cycle.label.split('·').slice(1).join('·').trim()
-      : cycle.label || 'Utilities'
-  }`;
+  const monthName = formatCycleLabel(cycle.year, cycle.month).split(' ')[0];
 
   return (
     <>
       <div className="header">
-        <div className="cycle-label">{cycleHeaderLabel}</div>
-        <h1>This month&apos;s split</h1>
+        <h1>{monthName} Split</h1>
       </div>
       <EditorBody
         cycle={cycle}

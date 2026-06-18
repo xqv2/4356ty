@@ -16,7 +16,6 @@ import RoommateRow from './RoommateRow';
 import SummaryBlock from './SummaryBlock';
 
 import { computeSplit } from '@/lib/split';
-import { formatMoney } from '@/lib/format';
 import { generateMessage } from '@/lib/message';
 
 import type {
@@ -106,8 +105,6 @@ export default function EditorBody({
   );
 
   const roommateCount = roommates.length;
-  const billCount = bills.length;
-  const billsMeta = `${billCount} item${billCount === 1 ? '' : 's'} · ${formatMoney(totalCents)}`;
   const ctaDisabled = totalCents === 0 || roommateCount === 0;
 
   function splitForRoommate(r: Roommate): CycleSplit {
@@ -316,7 +313,6 @@ export default function EditorBody({
       <div className="section">
         <div className="section-head">
           <div className="section-title">Bills</div>
-          <div className="section-meta">{billsMeta}</div>
         </div>
 
         {bills.map((bill) => (
