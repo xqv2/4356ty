@@ -10,53 +10,60 @@ import { createServiceClient, getAdminUserId } from '@/lib/supabase/service';
 
 const DEFAULT_LABEL = 'Utilities';
 
-const DEFAULT_BILLS: Array<Pick<Bill, 'vendor' | 'kind'> & { recurring: boolean }> = [
-  { vendor: 'Electricity', kind: 'electricity', recurring: true },
-  { vendor: 'Water',       kind: 'water',       recurring: true },
-  { vendor: 'Trash',       kind: 'trash',       recurring: true },
-  { vendor: 'Internet',    kind: 'internet',    recurring: true },
+const DEFAULT_BILLS: Array<Pick<Bill, 'vendor' | 'kind' | 'provider'> & { recurring: boolean }> = [
+  { vendor: 'Electricity', kind: 'electricity', provider: 'PG&E',        recurring: true },
+  { vendor: 'Water',       kind: 'water',       provider: 'SFPUC',       recurring: true },
+  { vendor: 'Trash',       kind: 'trash',       provider: 'SF Recology', recurring: true },
+  { vendor: 'Internet',    kind: 'internet',    provider: 'Sonic',       recurring: true },
 ];
+
+const PROVIDER_DEFAULTS: Record<string, string> = {
+  electricity: 'PG&E',
+  water: 'SFPUC',
+  trash: 'SF Recology',
+  internet: 'Sonic',
+};
 
 // Historical sample data — Jan through Apr. May onwards the user fills in.
 const SAMPLE_MONTHS: Array<{
   year: number;
   month: number;
-  bills: Array<{ vendor: string; kind: Bill['kind']; amount_cents: number }>;
+  bills: Array<{ vendor: string; kind: Bill['kind']; provider: string; amount_cents: number }>;
 }> = [
   {
     year: 2026, month: 1,
     bills: [
-      { vendor: 'Electricity', kind: 'electricity', amount_cents: 14500 },
-      { vendor: 'Water',       kind: 'water',       amount_cents: 3800  },
-      { vendor: 'Trash',       kind: 'trash',       amount_cents: 4400  },
-      { vendor: 'Internet',    kind: 'internet',    amount_cents: 4900  },
+      { vendor: 'Electricity', kind: 'electricity', provider: 'PG&E',        amount_cents: 14500 },
+      { vendor: 'Water',       kind: 'water',       provider: 'SFPUC',       amount_cents: 3800  },
+      { vendor: 'Trash',       kind: 'trash',       provider: 'SF Recology', amount_cents: 4400  },
+      { vendor: 'Internet',    kind: 'internet',    provider: 'Sonic',       amount_cents: 4900  },
     ],
   },
   {
     year: 2026, month: 2,
     bills: [
-      { vendor: 'Electricity', kind: 'electricity', amount_cents: 15200 },
-      { vendor: 'Water',       kind: 'water',       amount_cents: 3500  },
-      { vendor: 'Trash',       kind: 'trash',       amount_cents: 4400  },
-      { vendor: 'Internet',    kind: 'internet',    amount_cents: 4900  },
+      { vendor: 'Electricity', kind: 'electricity', provider: 'PG&E',        amount_cents: 15200 },
+      { vendor: 'Water',       kind: 'water',       provider: 'SFPUC',       amount_cents: 3500  },
+      { vendor: 'Trash',       kind: 'trash',       provider: 'SF Recology', amount_cents: 4400  },
+      { vendor: 'Internet',    kind: 'internet',    provider: 'Sonic',       amount_cents: 4900  },
     ],
   },
   {
     year: 2026, month: 3,
     bills: [
-      { vendor: 'Electricity', kind: 'electricity', amount_cents: 11800 },
-      { vendor: 'Water',       kind: 'water',       amount_cents: 4200  },
-      { vendor: 'Trash',       kind: 'trash',       amount_cents: 4400  },
-      { vendor: 'Internet',    kind: 'internet',    amount_cents: 4900  },
+      { vendor: 'Electricity', kind: 'electricity', provider: 'PG&E',        amount_cents: 11800 },
+      { vendor: 'Water',       kind: 'water',       provider: 'SFPUC',       amount_cents: 4200  },
+      { vendor: 'Trash',       kind: 'trash',       provider: 'SF Recology', amount_cents: 4400  },
+      { vendor: 'Internet',    kind: 'internet',    provider: 'Sonic',       amount_cents: 4900  },
     ],
   },
   {
     year: 2026, month: 4,
     bills: [
-      { vendor: 'Electricity', kind: 'electricity', amount_cents: 9800  },
-      { vendor: 'Water',       kind: 'water',       amount_cents: 4500  },
-      { vendor: 'Trash',       kind: 'trash',       amount_cents: 4400  },
-      { vendor: 'Internet',    kind: 'internet',    amount_cents: 4900  },
+      { vendor: 'Electricity', kind: 'electricity', provider: 'PG&E',        amount_cents: 9800  },
+      { vendor: 'Water',       kind: 'water',       provider: 'SFPUC',       amount_cents: 4500  },
+      { vendor: 'Trash',       kind: 'trash',       provider: 'SF Recology', amount_cents: 4400  },
+      { vendor: 'Internet',    kind: 'internet',    provider: 'Sonic',       amount_cents: 4900  },
     ],
   },
 ];
@@ -157,7 +164,7 @@ export async function ensureCurrentCycle(): Promise<Cycle> {
         sample.bills.map((b, i) => ({
           cycle_id: created.id,
           vendor: b.vendor,
-          provider: null,
+          provider: b.provider,
           kind: b.kind,
           recurring: true,
           amount_cents: b.amount_cents,
@@ -184,7 +191,19 @@ export async function ensureCurrentCycle(): Promise<Cycle> {
       (await supabase.from('cycles').select('id').eq('user_id', userId)).data?.map((c) => c.id) ?? [],
     );
 
-  // ── 4. Return the latest cycle that has bills ────────────────────────────
+  // ── 4. Backfill missing providers on existing bills ─────────────────────
+  for (const [kind, provider] of Object.entries(PROVIDER_DEFAULTS)) {
+    await supabase
+      .from('bills')
+      .update({ provider })
+      .eq('kind', kind)
+      .is('provider', null)
+      .in('cycle_id',
+        (await supabase.from('cycles').select('id').eq('user_id', userId)).data?.map((c) => c.id) ?? [],
+      );
+  }
+
+  // ── 5. Return the latest cycle that has bills ────────────────────────────
   const { data: cycles } = await supabase
     .from('cycles')
     .select('*')
@@ -212,7 +231,7 @@ export async function ensureCurrentCycle(): Promise<Cycle> {
 
   await supabase.from('bills').insert(
     DEFAULT_BILLS.map((b, i) => ({
-      cycle_id: created.id, vendor: b.vendor, provider: null,
+      cycle_id: created.id, vendor: b.vendor, provider: b.provider ?? null,
       kind: b.kind, recurring: b.recurring, amount_cents: 0, position: i,
     })),
   );
@@ -284,7 +303,7 @@ export async function createNextCycle(): Promise<void> {
   } else {
     await supabase.from('bills').insert(
       DEFAULT_BILLS.map((b, i) => ({
-        cycle_id: newCycle.id, vendor: b.vendor, provider: null,
+        cycle_id: newCycle.id, vendor: b.vendor, provider: b.provider ?? null,
         kind: b.kind, recurring: b.recurring, amount_cents: 0, position: i,
       })),
     );

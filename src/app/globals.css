@@ -74,6 +74,17 @@ h6 {
   letter-spacing: -0.2px;
 }
 
+/* Remove browser focus ring on inputs — they use their own focus indicators */
+input:focus,
+input:focus-visible,
+textarea:focus,
+textarea:focus-visible,
+select:focus,
+select:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
 :focus-visible {
   outline: 2px solid var(--ink);
   outline-offset: 2px;
