@@ -56,7 +56,7 @@ export async function ensureCurrentCycle(): Promise<Cycle> {
   // ── 1. Seed roommates on first run ──────────────────────────────────────
   const { data: existingRoommates } = await supabase
     .from('roommates')
-    .select('id')
+    .select('id, name')
     .eq('user_id', userId)
     .is('archived_at', null)
     .limit(1);
@@ -68,6 +68,15 @@ export async function ensureCurrentCycle(): Promise<Cycle> {
       { user_id: userId, name: 'Bob',     position: 2 },
     ]);
   }
+
+  // Resolve Lokesh's id for the 20% discount seeding below.
+  const { data: allRoommates } = await supabase
+    .from('roommates')
+    .select('id, name')
+    .eq('user_id', userId)
+    .is('archived_at', null);
+
+  const lokeshId = allRoommates?.find((r) => r.name === 'Lokesh')?.id ?? null;
 
   // ── 2. Seed past months if they don't exist ─────────────────────────────
   for (const sample of SAMPLE_MONTHS) {
@@ -101,6 +110,12 @@ export async function ensureCurrentCycle(): Promise<Cycle> {
           position: i,
         })),
       );
+      if (lokeshId) {
+        await supabase.from('cycle_splits').upsert(
+          { cycle_id: created.id, roommate_id: lokeshId, override_percent: 20, override_cents: null, animal: 'duck' },
+          { onConflict: 'cycle_id,roommate_id' },
+        );
+      }
     }
   }
 
@@ -133,6 +148,12 @@ export async function ensureCurrentCycle(): Promise<Cycle> {
           amount_cents: 0,
           position: i,
         })),
+      );
+    }
+    if (lokeshId) {
+      await supabase.from('cycle_splits').upsert(
+        { cycle_id: existing.id, roommate_id: lokeshId, override_percent: 20, override_cents: null, animal: 'duck' },
+        { onConflict: 'cycle_id,roommate_id' },
       );
     }
 
@@ -198,6 +219,14 @@ export async function ensureCurrentCycle(): Promise<Cycle> {
 
   revalidatePath('/cycle/current');
   revalidatePath(`/cycle/${newCycle.id}`);
+
+  if (lokeshId) {
+    await supabase.from('cycle_splits').upsert(
+      { cycle_id: newCycle.id, roommate_id: lokeshId, override_percent: 20, override_cents: null, animal: 'duck' },
+      { onConflict: 'cycle_id,roommate_id' },
+    );
+  }
+
   return newCycle;
 }
 
