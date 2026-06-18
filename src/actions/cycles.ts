@@ -218,11 +218,13 @@ export async function createNextCycle(): Promise<void> {
   if (error || !created) throw new Error(error?.message ?? 'Failed to create next cycle');
   const newCycle = created as Cycle;
 
-  // Carry bills from prior cycle, amounts reset to 0.
+  // Carry bills from prior cycle. Amounts are carried forward as estimates
+  // so trash/internet stay at their fixed price and electricity/water give
+  // a starting point the user can edit when the real bill arrives.
   if (latest && latest.length > 0) {
     const { data: priorBills } = await supabase
       .from('bills')
-      .select('vendor, provider, kind, recurring, position')
+      .select('vendor, provider, kind, recurring, position, amount_cents')
       .eq('cycle_id', (latest[0] as Cycle).id)
       .order('position', { ascending: true });
 
@@ -231,7 +233,8 @@ export async function createNextCycle(): Promise<void> {
         priorBills.map((b, i) => ({
           cycle_id: newCycle.id, vendor: b.vendor, provider: b.provider ?? null,
           kind: b.kind ?? null, recurring: b.recurring ?? false,
-          amount_cents: 0, position: typeof b.position === 'number' ? b.position : i,
+          amount_cents: typeof b.amount_cents === 'number' ? b.amount_cents : 0,
+          position: typeof b.position === 'number' ? b.position : i,
         })),
       );
     }
