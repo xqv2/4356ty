@@ -26,7 +26,7 @@ export default function ShareLayout({ children }: { children: ReactNode }) {
         display: 'flex',
         alignItems: 'flex-start',
         justifyContent: 'center',
-        padding: '0',
+        padding: 'max(48px, calc(env(safe-area-inset-top) + 24px)) 12px 64px',
         // Mobile fallback bg matches the cream paper (per mockup 6 @media).
         ['--share-cream' as string]: CREAM,
       }}

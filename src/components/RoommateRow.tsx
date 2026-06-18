@@ -90,6 +90,7 @@ export default function RoommateRow({
           <input
             className="roommate-name-edit"
             type="text"
+            size={Math.max(name.length, 3)}
             value={name}
             onChange={(e) => setName(e.target.value)}
             onBlur={commitName}

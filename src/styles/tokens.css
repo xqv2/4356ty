@@ -127,7 +127,7 @@
 }
 
 .tab-add {
-  border: 1.5px solid var(--hairline);
+  border: none;
   background: none;
   color: var(--muted);
   width: 40px;
@@ -138,11 +138,11 @@
   margin-left: 8px;
   display: grid;
   place-items: center;
-  transition: color 0.12s, border-color 0.12s, transform 0.1s;
+  transition: color 0.12s, transform 0.1s;
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
 }
-.tab-add:hover { color: var(--ink); border-color: var(--ink); }
+.tab-add:hover { color: var(--ink); }
 .tab-add:active { transform: scale(0.9); }
 .tab-add svg { width: 13px; height: 13px; display: block; }
 
@@ -385,30 +385,8 @@ h1 {
 }
 
 .row-delete {
-  -webkit-appearance: none;
-  appearance: none;
-  border: none;
-  background: transparent;
-  color: var(--muted-soft);
-  cursor: pointer;
-  font-size: 18px;
-  padding: 0;
-  line-height: 1;
-  width: 36px;
-  height: 36px;
-  display: grid;
-  place-items: center;
-  border-radius: 50%;
-  opacity: 0;
-  transition: opacity 0.15s, color 0.15s;
-  flex-shrink: 0;
-  -webkit-tap-highlight-color: transparent;
+  display: none;
 }
-.bill-card:hover .row-delete,
-.roommate-row:hover .row-delete,
-.bill-card .row-delete:focus,
-.roommate-row .row-delete:focus { opacity: 1; }
-.row-delete:hover { color: var(--accent); }
 
 /* ===== Copy message button ================================================ */
 
@@ -453,7 +431,7 @@ h1 {
 .add-roommate {
   -webkit-appearance: none;
   appearance: none;
-  border: 1.5px solid var(--hairline);
+  border: none;
   background: transparent;
   color: var(--muted);
   cursor: pointer;
@@ -464,14 +442,14 @@ h1 {
   border-radius: 50%;
   padding: 0;
   flex-shrink: 0;
-  transition: color 0.12s, border-color 0.12s, transform 0.1s;
+  transition: color 0.12s, transform 0.1s;
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
 }
 .add-bill svg,
 .add-roommate svg { width: 13px; height: 13px; display: block; }
 .add-bill:hover,
-.add-roommate:hover { border-color: var(--ink); color: var(--ink); }
+.add-roommate:hover { color: var(--ink); }
 .add-bill:active,
 .add-roommate:active { transform: scale(0.88); }
 
@@ -791,6 +769,8 @@ h1 {
 
 .share-shell {
   max-width: var(--share-max);
+  width: 100%;
+  border-radius: 16px 16px 0 0;
   background: var(--paper);
   box-shadow: var(--shadow-paper);
   min-height: auto;
@@ -843,7 +823,7 @@ h1 {
 
 .share-summary {
   text-align: center;
-  padding: 72px 36px 12px;
+  padding: 40px 36px 12px;
 }
 
 .animal-avatar {
@@ -1250,9 +1230,12 @@ h1 {
   .bill-card:hover { border-color: var(--hairline); box-shadow: none; }
   .row-delete { display: none; }
   .tab:hover { color: var(--muted); background: transparent; }
-  .tab-add:hover { color: var(--muted); border-color: var(--hairline); }
+  .tab-add:hover { color: var(--muted); }
   .add-bill:hover,
-  .add-roommate:hover { border-color: var(--hairline); color: var(--muted); }
+  .add-roommate:hover { color: var(--muted); }
+
+  /* Prevent iOS Safari viewport zoom on input focus — requires font-size ≥ 16px */
+  input, textarea, select { font-size: 16px !important; }
 }
 
 /* iOS Safari: GPU layer only on elements that actually animate with transform.
@@ -1320,6 +1303,8 @@ body.login-page { background: var(--page); }
 }
 
 body.share-page { background: var(--paper-body); min-height: 100vh; }
+.share-page-frame { background: var(--paper-body); min-height: 100vh; }
+
 @media (min-width: 540px) {
   body.share-page {
     display: flex;
@@ -1328,8 +1313,14 @@ body.share-page { background: var(--paper-body); min-height: 100vh; }
     padding: 40px 20px;
   }
 }
+
 @media (max-width: 540px) {
   body.share-page { background: var(--paper); }
   body.share-page .share-shell { box-shadow: none; margin: 0; max-width: 100%; }
   body.share-page .share-shell::after { display: none; }
+
+  /* share-page-frame is the actual wrapper used in the layout */
+  .share-page-frame { background: var(--paper); }
+  .share-page-frame .share-shell { box-shadow: none; border-radius: 16px 16px 0 0; }
+  .share-shell::after { display: none; }
 }
