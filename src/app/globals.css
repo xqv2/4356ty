@@ -18,6 +18,8 @@
 html {
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
+  height: -webkit-fill-available;
+  scroll-behavior: smooth;
 }
 
 body {
@@ -29,6 +31,9 @@ body {
   line-height: 1.4;
   font-feature-settings: 'cv11', 'ss01';
   min-height: 100vh;
+  min-height: -webkit-fill-available;
+  /* Prevent overscroll rubber-band from showing white gap */
+  overscroll-behavior-y: none;
 }
 
 /* Sensible defaults so component CSS doesn't have to fight UA styles */

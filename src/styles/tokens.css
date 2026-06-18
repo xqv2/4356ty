@@ -57,7 +57,10 @@
   margin: 0 auto;
   background: var(--canvas);
   min-height: 100vh;
+  min-height: -webkit-fill-available;
   position: relative;
+  /* iOS momentum scrolling */
+  -webkit-overflow-scrolling: touch;
 }
 
 .app {
@@ -80,9 +83,11 @@
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
   z-index: 5;
+  /* Elevation shadow when sticky, indicating content scrolls underneath */
+  box-shadow: 0 1px 0 var(--hairline), 0 2px 8px rgba(0,0,0,0.04);
   /* Fade right edge to hint at more tabs */
-  -webkit-mask-image: linear-gradient(to right, black calc(100% - 48px), transparent 100%);
-  mask-image: linear-gradient(to right, black calc(100% - 48px), transparent 100%);
+  -webkit-mask-image: linear-gradient(to right, black calc(100% - 56px), transparent 100%);
+  mask-image: linear-gradient(to right, black calc(100% - 56px), transparent 100%);
 }
 .month-tabs::-webkit-scrollbar { display: none; }
 
@@ -1253,6 +1258,50 @@ h1 {
   .add-bill:hover,
   .add-roommate:hover { border-color: var(--hairline); color: var(--muted); }
 }
+
+/* iOS Safari: force GPU layer on animated elements to prevent jank */
+.bill-card,
+.msg-copy-btn,
+.add-bill,
+.add-roommate,
+.tab-add,
+.pdf-btn,
+.cta-inline,
+.tab {
+  will-change: transform;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+
+/* Tab active press state */
+.tab:active {
+  transform: scale(0.95);
+  opacity: 0.8;
+  transition: transform 0.08s ease, opacity 0.08s ease;
+}
+
+/* Roommate row press feel */
+.roommate-row:active .roommate-name-wrap,
+.roommate-row:active .roommate-amount {
+  opacity: 0.7;
+  transition: opacity 0.08s ease;
+}
+
+/* Share toggle press */
+.share-toggle:active {
+  transform: scale(0.98);
+  transition: transform 0.1s ease;
+}
+
+/* Login button already has :active via cta-inline — ensure fast */
+.login-form .cta-inline { transition: background 0.12s, transform 0.08s ease; }
+.login-form .cta-inline:active { transform: scale(0.98); }
+
+/* Copy button: faster release so it snaps back promptly */
+.msg-copy-btn {
+  transition: opacity 0.12s, transform 0.08s cubic-bezier(0.2, 0.8, 0.2, 1), background 0.18s;
+}
+.msg-copy-btn:active { transform: scale(0.93); transition-duration: 0.06s; }
 
 /* ===== Responsive ========================================================= */
 
