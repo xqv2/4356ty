@@ -126,41 +126,51 @@ export default function EditorBody({
     });
   }, [roommates, splitsByRoommate, computed]);
 
-  const handleCopyMessage = useCallback(async (roommateId: string) => {
+  const handleCopyMessage = useCallback((roommateId: string) => {
     if (demoMode) return;
-    let url = urlByRoommate.get(roommateId);
-    // Generate links if this roommate doesn't have one yet.
-    if (!url && !generatingRef.current) {
-      generatingRef.current = true;
-      try {
-        const results = await generateShareLinks(cycle.id);
-        const base = typeof window !== 'undefined' ? window.location.origin : '';
-        setUrlByRoommate((prev) => {
-          const next = new Map(prev);
-          for (const r of results) next.set(r.roommateId, r.url || `${base}/share/${r.token}`);
-          return next;
-        });
-        url = results.find((r) => r.roommateId === roommateId)?.url ?? undefined;
-      } catch (e) {
-        console.error('generateShareLinks failed', e);
-      } finally {
-        generatingRef.current = false;
-      }
-    }
+
+    // Build message synchronously — must copy before any await to preserve
+    // the iOS Safari user-gesture context (clipboard requires it).
     const roommateSplits = buildRoommateSplits();
     const target = roommateSplits.find((s) => s.roommate_id === roommateId);
+    const existingUrl = urlByRoommate.get(roommateId);
     const message = generateMessage(cycle, bills, roommateSplits, target);
-    const text = url ? `${message}\n\nBreakdown:\n${url}` : message;
-    try {
-      await navigator.clipboard.writeText(text);
-    } catch {
+    const text = existingUrl ? `${message}\n\nBreakdown:\n${existingUrl}` : message;
+
+    // Copy now, within the gesture tick.
+    const doCopy = (str: string) => {
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(str).catch(() => copyFallback(str));
+      } else {
+        copyFallback(str);
+      }
+    };
+    const copyFallback = (str: string) => {
       const ta = document.createElement('textarea');
-      ta.value = text;
-      ta.style.cssText = 'position:fixed;left:-9999px';
+      ta.value = str;
+      ta.style.cssText = 'position:fixed;top:0;left:0;opacity:0;pointer-events:none';
       document.body.appendChild(ta);
+      ta.focus();
       ta.select();
       document.execCommand('copy');
       document.body.removeChild(ta);
+    };
+    doCopy(text);
+
+    // Fetch share URL in background — populates cache so next copy includes it.
+    if (!existingUrl && !generatingRef.current) {
+      generatingRef.current = true;
+      generateShareLinks(cycle.id)
+        .then((results) => {
+          const base = typeof window !== 'undefined' ? window.location.origin : '';
+          setUrlByRoommate((prev) => {
+            const next = new Map(prev);
+            for (const r of results) next.set(r.roommateId, r.url || `${base}/share/${r.token}`);
+            return next;
+          });
+        })
+        .catch((e) => console.error('generateShareLinks failed', e))
+        .finally(() => { generatingRef.current = false; });
     }
   }, [cycle, bills, urlByRoommate, buildRoommateSplits, demoMode]);
 
@@ -387,7 +397,7 @@ export default function EditorBody({
               computedAmountCents={owedCents}
               onSave={(patch) => handleRoommateSave(r.id, patch)}
               onDelete={() => handleRoommateDelete(r.id)}
-              onCopyMessage={() => { void handleCopyMessage(r.id); }}
+              onCopyMessage={() => { handleCopyMessage(r.id); }}
               isLandlord={r.name.toLowerCase() === 'johny'}
             />
           );
