@@ -940,7 +940,8 @@ h1 {
 
 .share-details {
   display: none;
-  padding: 0 36px 36px;
+  padding: 0 24px 36px;
+  text-align: left;
   animation: fadeIn 0.22s ease-out;
 }
 .share-details.open { display: block; }
@@ -957,6 +958,7 @@ h1 {
   padding: 14px 0;
   border-bottom: 1px solid var(--paper-hairline);
   font-size: 14px;
+  text-align: left;
 }
 .share-detail-row:last-child { border-bottom: none; }
 

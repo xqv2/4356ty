@@ -9,7 +9,7 @@
 // inside useTransition; if any of those throw (e.g. placeholder Supabase
 // creds while building locally), the optimistic UI stays put.
 
-import { useMemo, useState, useTransition, useCallback, useRef, type ReactNode } from 'react';
+import { useMemo, useState, useTransition, useCallback, useRef, useEffect, type ReactNode } from 'react';
 
 import BillCard from './BillCard';
 import RoommateRow from './RoommateRow';
@@ -68,6 +68,22 @@ export default function EditorBody({
   // Share URL per roommate — populated on first copy via generateShareLinks (which shortens via TinyURL).
   const [urlByRoommate, setUrlByRoommate] = useState<Map<string, string>>(new Map());
   const generatingRef = useRef(false);
+
+  // Seed from server-provided active tokens so first copy already has the link.
+  useEffect(() => {
+    if (activeTokens.length === 0) return;
+    const base = window.location.origin;
+    setUrlByRoommate((prev) => {
+      const next = new Map(prev);
+      for (const t of activeTokens) {
+        if (!next.has(t.roommate_id)) {
+          next.set(t.roommate_id, `${base}/share/${t.token}`);
+        }
+      }
+      return next;
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // ---- derived ---------------------------------------------------------------
   const totalCents = useMemo(
