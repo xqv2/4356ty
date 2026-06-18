@@ -34,6 +34,7 @@ import {
   saveBill as saveBillAction,
 } from '@/actions/bills';
 import {
+  addRoommate as addRoommateAction,
   removeRoommate as removeRoommateAction,
   saveRoommate as saveRoommateAction,
   setOverride as setOverrideAction,
@@ -294,6 +295,32 @@ export default function EditorBody({
     }
   }
 
+  function handleRoommateAdd() {
+    const name = window.prompt('Roommate name:');
+    if (!name?.trim()) return;
+    const optimistic: Roommate = {
+      id: `temp-${Date.now()}`,
+      user_id: cycle.id,
+      name: name.trim(),
+      position: roommates.length,
+      archived_at: null,
+      created_at: new Date().toISOString(),
+    };
+    setRoommates((prev) => [...prev, optimistic]);
+    if (demoMode) return;
+    startTransition(async () => {
+      try {
+        const created = await addRoommateAction(name.trim());
+        setRoommates((prev) =>
+          prev.map((r) => (r.id === optimistic.id ? created : r)),
+        );
+      } catch (e) {
+        console.error('addRoommate failed', e);
+        setRoommates((prev) => prev.filter((r) => r.id !== optimistic.id));
+      }
+    });
+  }
+
   function handleRoommateDelete(roommateId: string) {
     setRoommates((prev) => prev.filter((r) => r.id !== roommateId));
     setSplits((prev) => prev.filter((s) => s.roommate_id !== roommateId));
@@ -367,8 +394,7 @@ export default function EditorBody({
         <button
           type="button"
           className="add-roommate"
-          disabled
-          aria-disabled="true"
+          onClick={handleRoommateAdd}
         >
           + Add roommate
         </button>
