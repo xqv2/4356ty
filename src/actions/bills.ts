@@ -116,7 +116,8 @@ export async function attachPdf(billId: UUID, file: File): Promise<Bill> {
     .single();
 
   const ownerId = cycleRow?.user_id ?? 'unknown';
-  const path = `${ownerId}/${bill.cycle_id}/${bill.id}.pdf`;
+  const ext = file.name.includes('.') ? file.name.slice(file.name.lastIndexOf('.')) : '';
+  const path = `${ownerId}/${bill.cycle_id}/${bill.id}${ext}`;
   const arrayBuffer = await file.arrayBuffer();
 
   const { error: uploadErr } = await supabase.storage

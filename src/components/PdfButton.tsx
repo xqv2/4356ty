@@ -34,8 +34,8 @@ export default function PdfButton({ attached, onUpload, onView }: PdfButtonProps
       <button
         type="button"
         className={attached ? 'pdf-btn attached' : 'pdf-btn'}
-        title={attached ? 'PDF attached' : 'Attach PDF'}
-        aria-label={attached ? 'View attached PDF' : 'Attach PDF'}
+        title={attached ? 'File attached' : 'Attach file'}
+        aria-label={attached ? 'View attached file' : 'Attach file'}
         aria-pressed={attached}
         onClick={handleClick}
       >
@@ -54,7 +54,7 @@ export default function PdfButton({ attached, onUpload, onView }: PdfButtonProps
       <input
         ref={inputRef}
         type="file"
-        accept="application/pdf,.pdf"
+        accept="application/pdf,.pdf,image/png,.png,image/jpeg,.jpg,.jpeg,image/webp,.webp"
         hidden
         onChange={handleChange}
       />
