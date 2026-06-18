@@ -83,11 +83,7 @@
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
   z-index: 5;
-  /* Elevation shadow when sticky, indicating content scrolls underneath */
   box-shadow: 0 1px 0 var(--hairline), 0 2px 8px rgba(0,0,0,0.04);
-  /* Fade right edge to hint at more tabs */
-  -webkit-mask-image: linear-gradient(to right, black calc(100% - 56px), transparent 100%);
-  mask-image: linear-gradient(to right, black calc(100% - 56px), transparent 100%);
 }
 .month-tabs::-webkit-scrollbar { display: none; }
 
@@ -1259,15 +1255,14 @@ h1 {
   .add-roommate:hover { border-color: var(--hairline); color: var(--muted); }
 }
 
-/* iOS Safari: force GPU layer on animated elements to prevent jank */
-.bill-card,
+/* iOS Safari: GPU layer only on elements that actually animate with transform.
+   DO NOT apply to .tab — it breaks background-color repaint on .active. */
 .msg-copy-btn,
 .add-bill,
 .add-roommate,
 .tab-add,
 .pdf-btn,
-.cta-inline,
-.tab {
+.cta-inline {
   will-change: transform;
   -webkit-backface-visibility: hidden;
   backface-visibility: hidden;
@@ -1275,9 +1270,7 @@ h1 {
 
 /* Tab active press state */
 .tab:active {
-  transform: scale(0.95);
-  opacity: 0.8;
-  transition: transform 0.08s ease, opacity 0.08s ease;
+  opacity: 0.7;
 }
 
 /* Roommate row press feel */
