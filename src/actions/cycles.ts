@@ -141,7 +141,23 @@ export async function ensureCurrentCycle(): Promise<Cycle> {
     }
   }
 
-  // ── 3. Return the latest cycle that has bills ────────────────────────────
+  // ── 3. Enforce fixed prices for Trash ($44) and Internet ($49) everywhere ─
+  await supabase
+    .from('bills')
+    .update({ amount_cents: 4400 })
+    .eq('kind', 'trash')
+    .in('cycle_id',
+      (await supabase.from('cycles').select('id').eq('user_id', userId)).data?.map((c) => c.id) ?? [],
+    );
+  await supabase
+    .from('bills')
+    .update({ amount_cents: 4900 })
+    .eq('kind', 'internet')
+    .in('cycle_id',
+      (await supabase.from('cycles').select('id').eq('user_id', userId)).data?.map((c) => c.id) ?? [],
+    );
+
+  // ── 4. Return the latest cycle that has bills ────────────────────────────
   const { data: cycles } = await supabase
     .from('cycles')
     .select('*')
