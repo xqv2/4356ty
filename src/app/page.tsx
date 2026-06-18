@@ -1,18 +1,9 @@
 // src/app/page.tsx
-// Root entry. Server component. Bounces to /cycle/current when signed in,
-// /login otherwise.
-
 import { redirect } from 'next/navigation';
-import { createClient } from '@/lib/supabase/server';
+import { isAuthenticated } from '@/lib/auth';
 
 export default async function HomePage() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (user) {
-    redirect('/cycle/current');
-  }
+  const authed = await isAuthenticated();
+  if (authed) redirect('/cycle/current');
   redirect('/login');
 }

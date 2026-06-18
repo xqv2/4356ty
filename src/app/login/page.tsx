@@ -1,7 +1,8 @@
 'use client';
 
 // src/app/login/page.tsx
-// Single-password admin gate. Email is fixed via NEXT_PUBLIC_ADMIN_EMAIL.
+// PIN-only login. Email and password live server-side in ADMIN_EMAIL /
+// ADMIN_PASSWORD env vars. The user only types their 4-digit ADMIN_PIN.
 
 import {
   useEffect,
@@ -10,11 +11,11 @@ import {
   type FormEvent,
 } from 'react';
 import { useRouter } from 'next/navigation';
-import { createClient } from '@/lib/supabase/client';
+import { loginWithPin } from '@/actions/auth';
 
 export default function LoginPage() {
   const router = useRouter();
-  const [password, setPassword] = useState('');
+  const [pin, setPin] = useState('');
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -25,50 +26,29 @@ export default function LoginPage() {
     };
   }, []);
 
-  const handlePasswordChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setPassword(e.target.value);
+  const handlePinChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const v = e.target.value.replace(/\D/g, '').slice(0, 4);
+    setPin(v);
     if (error) setError(null);
   };
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (pending) return;
-
-    if (!password) {
-      setError('Please enter the password.');
-      return;
-    }
-
-    const adminEmail = process.env.NEXT_PUBLIC_ADMIN_EMAIL;
-    if (!adminEmail) {
-      setError('Login is not configured. Set NEXT_PUBLIC_ADMIN_EMAIL.');
-      return;
-    }
+    if (pending || pin.length !== 4) return;
 
     setPending(true);
     setError(null);
 
-    try {
-      const supabase = createClient();
-      const { error: signInError } = await supabase.auth.signInWithPassword({
-        email: adminEmail,
-        password,
-      });
-      if (signInError) {
-        setError('Wrong password.');
-        setPending(false);
-        return;
-      }
-      router.replace('/');
-      router.refresh();
-    } catch (err) {
-      setError(
-        err instanceof Error
-          ? err.message
-          : 'Could not sign in. Try again in a moment.',
-      );
+    const result = await loginWithPin(pin);
+    if (result.error) {
+      setError(result.error);
       setPending(false);
+      setPin('');
+      return;
     }
+
+    router.replace('/');
+    router.refresh();
   };
 
   return (
@@ -82,20 +62,23 @@ export default function LoginPage() {
       <form className="login-form" onSubmit={handleSubmit} noValidate>
         <input
           type="password"
-          name="password"
-          value={password}
-          onChange={handlePasswordChange}
-          placeholder="Password"
+          inputMode="numeric"
+          pattern="[0-9]{4}"
+          maxLength={4}
+          name="pin"
+          value={pin}
+          onChange={handlePinChange}
+          placeholder="4-digit PIN"
           autoComplete="current-password"
           autoFocus
           disabled={pending}
           aria-invalid={error ? 'true' : undefined}
-          aria-label="Password"
+          aria-label="PIN"
         />
         <button
           type="submit"
           className="cta-inline"
-          disabled={pending || !password}
+          disabled={pending || pin.length !== 4}
         >
           {pending ? 'Signing in…' : 'Sign in'}
         </button>
