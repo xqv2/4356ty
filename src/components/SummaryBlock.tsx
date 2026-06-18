@@ -14,14 +14,12 @@ export interface SummaryBlockProps {
 
 export default function SummaryBlock({
   totalCents,
-  roommateCount,
   perPersonCents,
 }: SummaryBlockProps) {
   return (
     <div className="summary">
       <div className="summary-total">
         Total <AnimatedAmount cents={totalCents} className="summary-total-amount" />
-        {' '}· split {roommateCount} ways
       </div>
       <AnimatedAmount cents={perPersonCents} className="summary-each" />
       <div className="summary-each-label">each</div>

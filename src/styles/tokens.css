@@ -48,11 +48,11 @@
   --share-max: 560px;
   --login-max: 380px;
   --modal-max: 480px;
-  --radius-card: 20px;
-  --radius-summary: 18px;
-  --radius-message: 14px;
+  --radius-card: 24px;
+  --radius-summary: 22px;
+  --radius-message: 18px;
   --radius-pill: 9999px;
-  --radius-input: 12px;
+  --radius-input: 16px;
 }
 
 /* ===== Editor / Share shells =============================================== */
@@ -67,17 +67,17 @@
 }
 
 .app {
-  padding: 0 24px 32px;
+  padding: 0 24px 80px;
 }
 
 /* ===== Month tabs ========================================================= */
 
 .month-tabs {
   position: sticky;
-  bottom: 0;
+  top: 0;
   background: var(--canvas);
-  border-top: 1px solid var(--hairline);
-  border-bottom: none;
+  border-bottom: 1px solid var(--hairline);
+  border-top: none;
   padding: 12px 24px;
   display: flex;
   align-items: center;
@@ -191,6 +191,7 @@
 h1 {
   font-size: 40px;
   font-weight: 800;
+  font-variation-settings: 'wght' 800;
   letter-spacing: -1.2px;
   line-height: 1.05;
 }
@@ -354,59 +355,65 @@ h1 {
   font-size: 18px;
   padding: 0;
   line-height: 1;
-  width: 24px;
-  height: 24px;
+  width: 44px;
+  height: 44px;
   display: grid;
   place-items: center;
   border-radius: 50%;
   opacity: 0;
   transition: opacity 0.15s, color 0.15s;
+  margin: -10px -10px -10px 0;
 }
 .bill-card:hover .row-delete,
-.roommate-row:hover .row-delete { opacity: 1; }
+.roommate-row:hover .row-delete,
+.bill-card .row-delete:focus,
+.roommate-row .row-delete:focus { opacity: 1; }
 .row-delete:hover { color: var(--accent); background: var(--surface-soft); }
 
 .msg-copy-btn {
   border: none;
-  background: none;
-  color: var(--muted);
+  background: var(--accent);
+  color: #fff;
   cursor: pointer;
-  padding: 0;
-  width: 28px;
-  height: 28px;
-  display: grid;
-  place-items: center;
-  border-radius: 6px;
-  opacity: 1;
-  transition: opacity 0.15s, color 0.15s, background 0.15s;
+  padding: 0 14px;
+  height: 44px;
+  min-width: 44px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: var(--radius-pill);
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: opacity 0.15s;
   flex-shrink: 0;
 }
 .msg-copy-btn svg { width: 14px; height: 14px; }
-.msg-copy-btn:hover { color: var(--text); background: var(--surface-soft); }
-.msg-copy-btn.copied { color: var(--accent); }
+.msg-copy-btn:hover { opacity: 0.88; }
+.msg-copy-btn.copied { background: #22c55e; }
 
 /* ===== Add row ============================================================ */
 
 .add-bill,
 .add-roommate {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  width: 100%;
-  padding: 14px;
-  border: 1px dashed var(--hairline);
-  border-radius: var(--radius-card);
-  background: transparent;
+  border: none;
+  background: none;
   color: var(--muted);
-  font-family: inherit;
-  font-size: 14px;
   cursor: pointer;
-  font-weight: 500;
+  font-size: 22px;
+  font-weight: 300;
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  padding: 0;
+  line-height: 1;
+  flex-shrink: 0;
 }
 .add-bill:hover,
 .add-roommate:hover {
-  border-color: var(--ink);
+  background: var(--surface-soft);
   color: var(--ink);
 }
 

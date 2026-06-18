@@ -40,8 +40,8 @@ import {
   setOverride as setOverrideAction,
 } from '@/actions/roommates';
 import { generateShareLinks } from '@/actions/share';
+import { createNextCycle } from '@/actions/cycles';
 import { formatCycleLabel } from '@/lib/format';
-import ShareLinksLauncher from '@/app/(editor)/cycle/[slug]/_share-launcher';
 
 export interface EditorBodyProps {
   cycle: Cycle;
@@ -335,28 +335,35 @@ export default function EditorBody({
 
   // ---- render ----------------------------------------------------------------
   const monthName = formatCycleLabel(cycle.year, cycle.month).split(' ')[0];
-  const ctaDisabled = totalCents === 0 || roommateCount === 0;
+  const [addingMonth, startAddMonth] = useTransition();
 
   return (
     <>
       <div className="header">
         <h1>{monthName} Split</h1>
-        <ShareLinksLauncher
-          cycleId={cycle.id}
-          disabled={ctaDisabled}
-          cycle={cycle}
-          bills={bills}
-          roommates={roommates}
-          splits={splits}
-          computedSplit={computed}
-          existingTokens={activeTokens}
-          asFab
-        />
+        <button
+          type="button"
+          className="share-fab"
+          aria-label="Add next month"
+          disabled={addingMonth}
+          onClick={() => {
+            startAddMonth(() => { void createNextCycle(); });
+          }}
+        >
+          {addingMonth ? '…' : '+'}
+        </button>
       </div>
 
       <div className="section">
         <div className="section-head">
           <div className="section-title">Bills</div>
+          <button
+            type="button"
+            className="add-bill"
+            disabled
+            aria-disabled="true"
+            aria-label="Add bill"
+          >+</button>
         </div>
 
         {bills.map((bill) => (
@@ -368,15 +375,6 @@ export default function EditorBody({
             onAttachPdf={(file) => handleBillAttach(bill.id, file)}
           />
         ))}
-
-        <button
-          type="button"
-          className="add-bill"
-          disabled
-          aria-disabled="true"
-        >
-          + Add bill
-        </button>
       </div>
 
       <div className="section">
@@ -390,6 +388,12 @@ export default function EditorBody({
       <div className="section">
         <div className="section-head">
           <div className="section-title">Roommates</div>
+          <button
+            type="button"
+            className="add-roommate"
+            onClick={handleRoommateAdd}
+            aria-label="Add roommate"
+          >+</button>
         </div>
 
         {roommates.map((r) => {
@@ -408,14 +412,6 @@ export default function EditorBody({
             />
           );
         })}
-
-        <button
-          type="button"
-          className="add-roommate"
-          onClick={handleRoommateAdd}
-        >
-          + Add roommate
-        </button>
       </div>
     </>
   );

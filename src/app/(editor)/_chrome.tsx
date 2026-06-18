@@ -42,8 +42,8 @@ export default function EditorChrome({ cycles, children, onAddNextMonth }: Edito
 
   return (
     <div className="editor-shell">
-      <div className="app">{children}</div>
       <MonthTabs cycles={cycles} activeId={activeId} onAddNextMonth={onAddNextMonth} />
+      <div className="app">{children}</div>
     </div>
   );
 }
