@@ -21,8 +21,9 @@ export default function SummaryBlock({
       <div className="summary-total">
         Total <AnimatedAmount cents={totalCents} className="summary-total-amount" />
       </div>
-      <AnimatedAmount cents={perPersonCents} className="summary-each" />
-      <div className="summary-each-label">each</div>
+      <div className="summary-each-line">
+        <AnimatedAmount cents={perPersonCents} className="summary-each" /> each
+      </div>
     </div>
   );
 }
