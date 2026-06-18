@@ -340,7 +340,7 @@ export default function EditorBody({
   return (
     <>
       <div className="header">
-        <h1>{monthName} Split</h1>
+        <h1>{monthName}</h1>
         <button
           type="button"
           className="share-fab"
