@@ -353,7 +353,11 @@ export default function EditorBody({
             disabled
             aria-disabled="true"
             aria-label="Add bill"
-          >+</button>
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" aria-hidden="true">
+              <path d="M12 5v14M5 12h14"/>
+            </svg>
+          </button>
         </div>
 
         {bills.map((bill) => (
@@ -383,7 +387,11 @@ export default function EditorBody({
             className="add-roommate"
             onClick={handleRoommateAdd}
             aria-label="Add roommate"
-          >+</button>
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" aria-hidden="true">
+              <path d="M12 5v14M5 12h14"/>
+            </svg>
+          </button>
         </div>
 
         {roommates.map((r) => {

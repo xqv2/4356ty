@@ -138,6 +138,7 @@
   line-height: 1;
 }
 .tab-add:hover { color: var(--ink); border-color: var(--ink); }
+.tab-add svg { width: 13px; height: 13px; display: block; }
 
 /* ===== Header ============================================================= */
 
@@ -430,6 +431,8 @@ h1 {
   flex-shrink: 0;
   -webkit-tap-highlight-color: transparent;
 }
+.add-bill svg,
+.add-roommate svg { width: 13px; height: 13px; display: block; }
 .add-bill:hover,
 .add-roommate:hover {
   border-color: var(--ink);
@@ -1201,16 +1204,12 @@ h1 {
 /* ===== Touch / mobile overrides =========================================== */
 
 @media (hover: none) {
-  /* Single tap goes straight to input — no hover-state interception */
   .bill-card:hover {
     border-color: var(--hairline);
     box-shadow: none;
   }
-  /* Hide × on roommate rows — rarely need to delete, keeps layout clean */
-  .roommate-row .row-delete { display: none; }
-  /* Bill × stays but at reduced opacity so it doesn't dominate */
-  .bill-card .row-delete { opacity: 0.35; }
-  /* Suppress hover-only color shifts */
+  /* Hide × on mobile — clean layout, deletion is a desktop action */
+  .row-delete { display: none; }
   .tab:hover { color: var(--muted); background: transparent; }
   .tab-add:hover { color: var(--muted); border-color: var(--hairline); }
   .add-bill:hover,
