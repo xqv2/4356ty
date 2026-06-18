@@ -869,6 +869,8 @@ h1 {
   display: flex;
   align-items: center;
   gap: 10px;
+  flex: 1;
+  min-width: 0;
 }
 .share-detail-vendor .icon {
   width: 32px;
@@ -893,6 +895,9 @@ h1 {
 .share-detail-amount {
   font-weight: 600;
   font-variant-numeric: tabular-nums;
+  flex-shrink: 0;
+  text-align: right;
+  padding-left: 12px;
 }
 
 .pdf-link {
