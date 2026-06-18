@@ -157,6 +157,11 @@ export default function EditorBody({
     };
     doCopy(text);
 
+    // Haptic feedback on supported devices
+    if (typeof navigator !== 'undefined' && navigator.vibrate) {
+      navigator.vibrate(8);
+    }
+
     // Fetch share URL in background — populates cache so next copy includes it.
     if (!existingUrl && !generatingRef.current) {
       generatingRef.current = true;

@@ -1,10 +1,8 @@
 /* ============================================================================
-   tokens.css — Design tokens + component defaults for the Bills app.
-   Ported from mockups/screens/shared.css and the per-screen mockup styles.
+   tokens.css — Design tokens + component styles. 8px grid throughout.
    ========================================================================= */
 
 :root {
-  /* Color tokens */
   --canvas: #ffffff;
   --page: #f5f5f4;
   --ink: #222222;
@@ -17,18 +15,16 @@
   --accent: #ff385c;
   --accent-deep: #e00b41;
 
-  /* Share / receipt-paper tokens */
   --paper: #fffef8;
   --paper-body: #e8e3d8;
   --paper-hairline: rgba(0, 0, 0, 0.08);
   --paper-dashed: rgba(0, 0, 0, 0.18);
   --paper-stamp: rgba(0, 0, 0, 0.25);
 
-  /* Shadows */
   --shadow-card:
     rgba(0, 0, 0, 0.02) 0 0 0 1px,
     rgba(0, 0, 0, 0.04) 0 2px 6px 0,
-    rgba(0, 0, 0, 0.1) 0 4px 8px 0;
+    rgba(0, 0, 0, 0.10) 0 4px 8px 0;
   --shadow-cta: 0 4px 14px rgba(255, 56, 92, 0.22);
   --shadow-modal: 0 20px 60px rgba(0, 0, 0, 0.3);
   --shadow-paper:
@@ -38,12 +34,10 @@
     0 0 40px rgba(0, 0, 0, 0.06),
     0 4px 14px rgba(0, 0, 0, 0.04);
 
-  /* Typography */
   --sans: 'Inter', system-ui, -apple-system, sans-serif;
   --mono: 'JetBrains Mono', 'Courier New', monospace;
   --barcode: 'Libre Barcode 39', monospace;
 
-  /* Layout */
   --editor-max: 480px;
   --share-max: 560px;
   --login-max: 380px;
@@ -67,7 +61,7 @@
 }
 
 .app {
-  padding: 0 24px 80px;
+  padding: 0 24px max(72px, calc(56px + env(safe-area-inset-bottom)));
 }
 
 /* ===== Month tabs ========================================================= */
@@ -77,16 +71,18 @@
   top: 0;
   background: var(--canvas);
   border-bottom: 1px solid var(--hairline);
-  border-top: none;
-  padding: 12px 24px;
+  padding: 8px 24px;
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 2px;
   font-family: var(--sans);
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
   z-index: 5;
+  /* Fade right edge to hint at more tabs */
+  -webkit-mask-image: linear-gradient(to right, black calc(100% - 48px), transparent 100%);
+  mask-image: linear-gradient(to right, black calc(100% - 48px), transparent 100%);
 }
 .month-tabs::-webkit-scrollbar { display: none; }
 
@@ -98,18 +94,25 @@
   padding: 6px 8px;
   cursor: pointer;
   flex-shrink: 0;
+  -webkit-tap-highlight-color: transparent;
 }
 .tab-arrow:hover { color: var(--ink); }
 
 .tab {
-  padding: 8px 14px;
+  padding: 10px 14px;
+  min-height: 40px;
   color: var(--muted);
   text-decoration: none;
   font-weight: 500;
   font-size: 13px;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.04em;
   flex-shrink: 0;
   border-radius: 8px;
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+  -webkit-tap-highlight-color: transparent;
+  transition: color 0.12s, background 0.12s;
 }
 .tab:hover { color: var(--ink); background: var(--surface-soft); }
 .tab.active { color: var(--canvas); font-weight: 600; background: var(--ink); }
@@ -117,33 +120,35 @@
 .tab-year-sep {
   color: var(--muted-soft);
   font-size: 11px;
-  padding: 0 6px;
+  padding: 0 4px;
   flex-shrink: 0;
   font-weight: 500;
 }
 
 .tab-add {
-  border: 1px solid var(--hairline);
+  border: 1.5px solid var(--hairline);
   background: none;
   color: var(--muted);
-  font-size: 18px;
-  width: 32px;
-  height: 32px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   cursor: pointer;
   flex-shrink: 0;
-  margin-left: auto;
+  margin-left: 8px;
   display: grid;
   place-items: center;
-  line-height: 1;
+  transition: color 0.12s, border-color 0.12s, transform 0.1s;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
 }
 .tab-add:hover { color: var(--ink); border-color: var(--ink); }
+.tab-add:active { transform: scale(0.9); }
 .tab-add svg { width: 13px; height: 13px; display: block; }
 
 /* ===== Header ============================================================= */
 
 .header {
-  padding: 24px 0 28px;
+  padding: 24px 0;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -167,16 +172,16 @@
 .share-fab:not(:disabled):hover { opacity: 0.88; }
 
 .cycle-label {
-  font-size: 12px;
-  font-weight: 500;
+  font-size: 11px;
+  font-weight: 600;
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--muted);
   margin-bottom: 6px;
 }
 .cycle-label-edit {
-  font-size: 12px;
-  font-weight: 500;
+  font-size: 11px;
+  font-weight: 600;
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--muted);
@@ -193,7 +198,7 @@ h1 {
   font-size: 32px;
   font-weight: 700;
   font-variation-settings: 'wght' 700;
-  letter-spacing: -0.8px;
+  letter-spacing: -1.2px;
   line-height: 1.1;
 }
 
@@ -209,9 +214,9 @@ h1 {
 }
 
 .section-title {
-  font-size: 13px;
+  font-size: 11px;
   font-weight: 600;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--muted);
 }
@@ -228,17 +233,17 @@ h1 {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 14px;
+  padding: 16px;
   background: var(--canvas);
   border: 1px solid var(--hairline);
   border-radius: var(--radius-card);
   margin-bottom: 8px;
-  transition: border-color 0.15s, box-shadow 0.15s;
+  transition: border-color 0.15s, box-shadow 0.15s, transform 0.1s;
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
 }
 .bill-card:hover { border-color: var(--muted-soft); box-shadow: var(--shadow-card); }
-.bill-card.focused { border-color: var(--ink); box-shadow: var(--shadow-card); }
+.bill-card:active { transform: scale(0.995); background: var(--surface-soft); }
 
 .bill-icon {
   width: 44px;
@@ -263,7 +268,8 @@ h1 {
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 3px;
+  overflow: hidden;
 }
 
 .bill-vendor-edit {
@@ -276,6 +282,9 @@ h1 {
   padding: 0;
   width: 100%;
   font-family: var(--sans);
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
 }
 
 .bill-meta-edit {
@@ -287,18 +296,21 @@ h1 {
   padding: 0;
   width: 100%;
   font-family: var(--sans);
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
 }
 .bill-meta-edit:focus,
 .bill-vendor-edit:focus { color: var(--ink); }
 
 .bill-amount-input {
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 600;
   background: transparent;
   border: none;
   border-bottom: 1.5px solid transparent;
   text-align: right;
-  width: 96px;
+  width: 88px;
   padding: 4px 0;
   color: var(--ink);
   outline: none;
@@ -306,8 +318,9 @@ h1 {
   -webkit-tap-highlight-color: transparent;
   font-variant-numeric: tabular-nums;
   font-family: var(--sans);
+  transition: border-bottom-color 0.15s;
 }
-.bill-amount-input::placeholder { color: var(--muted-soft); font-weight: 500; }
+.bill-amount-input::placeholder { color: var(--muted); font-weight: 400; }
 .bill-amount-input:focus,
 .bill-amount-input.is-focused { border-bottom-color: var(--accent); }
 .bill-amount-input.is-approx {
@@ -324,6 +337,16 @@ h1 {
 
 /* ===== PDF button ========================================================= */
 
+.pdf-btn-wrap {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
 .pdf-btn {
   width: 32px;
   height: 32px;
@@ -334,16 +357,17 @@ h1 {
   display: grid;
   place-items: center;
   color: var(--muted);
-  flex-shrink: 0;
   padding: 0;
-  transition: all 0.15s;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
 }
-.pdf-btn:hover { color: var(--ink); border-color: var(--ink); }
+.pdf-btn:hover { color: var(--ink); border-color: var(--muted-soft); }
+.pdf-btn:active { transform: scale(0.9); }
 .pdf-btn.attached { background: var(--accent); color: white; border-color: var(--accent); }
 .pdf-btn svg { width: 13px; height: 13px; display: block; }
 
-/* hidden file input that PdfButton wraps around */
 .pdf-input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+
+/* ===== Row containers ====================================================== */
 
 .roommate-right {
   display: flex;
@@ -377,6 +401,7 @@ h1 {
   opacity: 0;
   transition: opacity 0.15s, color 0.15s;
   flex-shrink: 0;
+  -webkit-tap-highlight-color: transparent;
 }
 .bill-card:hover .row-delete,
 .roommate-row:hover .row-delete,
@@ -384,32 +409,44 @@ h1 {
 .roommate-row .row-delete:focus { opacity: 1; }
 .row-delete:hover { color: var(--accent); }
 
+/* ===== Copy message button ================================================ */
+
 .msg-copy-btn {
   border: none;
   background: var(--accent);
   color: #fff;
   cursor: pointer;
-  padding: 0 14px;
-  height: 44px;
-  min-width: 44px;
+  padding: 0 12px;
+  height: 36px;
+  min-width: 36px;
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
   border-radius: var(--radius-pill);
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 600;
   white-space: nowrap;
-  transition: opacity 0.15s;
+  transition: opacity 0.15s, transform 0.1s, background 0.2s;
   flex-shrink: 0;
   -webkit-appearance: none;
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
 }
-.msg-copy-btn svg { width: 14px; height: 14px; }
+.msg-copy-btn svg { width: 12px; height: 12px; }
 .msg-copy-btn:hover { opacity: 0.88; }
-.msg-copy-btn.copied { background: #22c55e; }
+.msg-copy-btn:active { transform: scale(0.94); }
+.msg-copy-btn.copied {
+  background: #16a34a;
+  animation: copiedPulse 0.28s ease-out;
+}
 
-/* ===== Add row ============================================================ */
+@keyframes copiedPulse {
+  0%   { transform: scale(1); }
+  45%  { transform: scale(1.06); }
+  100% { transform: scale(1); }
+}
+
+/* ===== Add row buttons ===================================================== */
 
 .add-bill,
 .add-roommate {
@@ -419,37 +456,35 @@ h1 {
   background: transparent;
   color: var(--muted);
   cursor: pointer;
-  font-size: 18px;
-  font-weight: 400;
-  width: 32px;
-  height: 32px;
+  width: 40px;
+  height: 40px;
   display: grid;
   place-items: center;
   border-radius: 50%;
   padding: 0;
-  line-height: 1;
   flex-shrink: 0;
+  transition: color 0.12s, border-color 0.12s, transform 0.1s;
   -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
 }
 .add-bill svg,
 .add-roommate svg { width: 13px; height: 13px; display: block; }
 .add-bill:hover,
-.add-roommate:hover {
-  border-color: var(--ink);
-  color: var(--ink);
-}
+.add-roommate:hover { border-color: var(--ink); color: var(--ink); }
+.add-bill:active,
+.add-roommate:active { transform: scale(0.88); }
 
 /* ===== Summary ============================================================ */
 
 .summary {
   background: var(--surface-soft);
   border-radius: var(--radius-summary);
-  padding: 32px 24px;
+  padding: 28px 24px;
   text-align: center;
   margin: 8px 0;
 }
 
-.summary-total { font-size: 14px; color: var(--muted); font-weight: 500; }
+.summary-total { font-size: 13px; color: var(--muted); font-weight: 500; }
 .summary-total b { color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
 .summary-total-amount { color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
 
@@ -458,15 +493,15 @@ h1 {
   align-items: baseline;
   justify-content: center;
   gap: 8px;
-  margin-top: 14px;
+  margin-top: 12px;
   font-size: 13px;
   color: var(--muted);
 }
 
 .summary-each {
-  font-size: 64px;
+  font-size: 56px;
   font-weight: 700;
-  letter-spacing: -2.2px;
+  letter-spacing: -1.8px;
   line-height: 1;
   font-variant-numeric: tabular-nums;
   color: var(--ink);
@@ -479,8 +514,8 @@ h1 {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 0;
-  border-bottom: 1px solid var(--hairline-soft);
+  padding: 14px 0;
+  border-bottom: 1px solid var(--hairline);
   gap: 12px;
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
@@ -490,7 +525,7 @@ h1 {
 .roommate-left {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   min-width: 0;
   flex: 1;
 }
@@ -506,12 +541,13 @@ h1 {
   font-weight: 600;
   color: var(--body);
   flex-shrink: 0;
+  border: 1px solid var(--hairline);
 }
 
 .roommate-name-wrap {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   min-width: 0;
   flex: 1;
 }
@@ -527,42 +563,43 @@ h1 {
   font-family: var(--sans);
   min-width: 0;
   width: auto;
-  max-width: 140px;
+  max-width: 130px;
   flex-shrink: 1;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .override-pill {
   font-size: 11px;
   font-weight: 600;
   color: var(--accent);
-  margin-left: 6px;
   background: rgba(255, 56, 92, 0.08);
-  padding: 2px 7px;
-  border-radius: 4px;
+  padding: 3px 7px;
+  border-radius: 6px;
+  flex-shrink: 0;
 }
 
 .discount-pill {
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 600;
-  letter-spacing: 0;
   color: var(--accent);
   background: rgba(255, 56, 92, 0.08);
-  padding: 2px 6px;
-  border-radius: 4px;
-  margin-left: 8px;
+  padding: 3px 7px;
+  border-radius: 6px;
   font-variant-numeric: tabular-nums;
+  flex-shrink: 0;
+  letter-spacing: -0.2px;
 }
 
 .tag-pill {
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 500;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.02em;
   color: var(--muted);
   background: var(--surface-soft);
-  padding: 2px 6px;
-  border-radius: 4px;
-  margin-left: 8px;
+  padding: 3px 7px;
+  border-radius: 6px;
   border: 1px solid var(--hairline);
+  flex-shrink: 0;
 }
 
 .roommate-amount {
@@ -570,6 +607,7 @@ h1 {
   font-weight: 600;
   font-variant-numeric: tabular-nums;
   flex-shrink: 0;
+  letter-spacing: -0.2px;
 }
 .roommate-amount.empty { color: var(--muted-soft); font-weight: 500; }
 
@@ -578,7 +616,7 @@ h1 {
   font-weight: 600;
   background: transparent;
   border: none;
-  border-bottom: 1px solid var(--hairline);
+  border-bottom: 1.5px solid var(--hairline);
   text-align: right;
   width: 80px;
   padding: 2px 0;
@@ -587,8 +625,9 @@ h1 {
   font-variant-numeric: tabular-nums;
   font-family: var(--sans);
   flex-shrink: 0;
+  transition: border-bottom-color 0.15s;
 }
-.override-input:focus { border-bottom-color: var(--ink); }
+.override-input:focus { border-bottom-color: var(--accent); }
 
 /* ===== Message preview ==================================================== */
 
@@ -596,7 +635,7 @@ h1 {
   background: var(--surface-soft);
   border-radius: var(--radius-message);
   padding: 20px;
-  font-size: 13.5px;
+  font-size: 14px;
   line-height: 1.65;
   white-space: pre-wrap;
   color: var(--body);
@@ -652,8 +691,12 @@ h1 {
   cursor: pointer;
   text-decoration: none;
   box-shadow: var(--shadow-cta);
+  transition: background 0.15s, transform 0.1s;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
 }
 .cta-inline:hover { background: var(--accent-deep); }
+.cta-inline:active { transform: scale(0.98); }
 
 /* ===== Login ============================================================== */
 
@@ -673,7 +716,7 @@ h1 {
   align-items: flex-start;
   gap: 6px;
   text-align: left;
-  padding: 0 0 28px;
+  padding: 0 0 24px;
 }
 
 .login-form { margin-top: 24px; }
@@ -687,6 +730,7 @@ h1 {
   padding: 16px;
   color: var(--ink);
   outline: none;
+  transition: border-color 0.15s, background 0.15s;
 }
 .login-form input:focus { border-color: var(--ink); background: var(--canvas); }
 .login-form .cta-inline {
@@ -705,7 +749,7 @@ h1 {
   line-height: 1.6;
 }
 
-/* OTP / verify code input — six digit boxes */
+/* OTP input */
 .otp-row {
   display: flex;
   gap: 8px;
@@ -759,7 +803,6 @@ h1 {
   background-color: var(--paper);
 }
 
-/* Torn-paper bottom edge */
 .share-shell::after {
   content: '';
   position: absolute;
@@ -907,25 +950,23 @@ h1 {
   cursor: pointer;
   color: var(--ink);
   margin: 32px auto 0;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
 }
-.share-toggle:hover { background: rgba(0, 0, 0, 0.03); border-color: var(--paper-dashed); }
-.share-toggle .chev {
-  transition: transform 0.2s;
-  font-size: 11px;
-  color: var(--muted);
-}
+.share-toggle:hover { background: rgba(0, 0, 0, 0.03); }
+.share-toggle .chev { transition: transform 0.2s; font-size: 11px; color: var(--muted); }
 .share-toggle.open .chev { transform: rotate(180deg); }
 
 .share-details {
   display: none;
   padding: 0 36px 36px;
-  animation: fadeIn 0.25s ease-out;
+  animation: fadeIn 0.22s ease-out;
 }
 .share-details.open { display: block; }
 
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(-4px); }
-  to { opacity: 1; transform: translateY(0); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 .share-detail-row {
@@ -986,7 +1027,7 @@ h1 {
 .pdf-link:hover { text-decoration: underline; }
 
 .share-divider-label {
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 600;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -1054,20 +1095,21 @@ h1 {
 
 .modal-close {
   position: absolute;
-  top: 18px;
-  right: 18px;
+  top: 16px;
+  right: 16px;
   border: none;
   background: none;
   font-size: 22px;
   color: var(--muted);
   cursor: pointer;
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   display: grid;
   place-items: center;
   text-decoration: none;
   line-height: 1;
+  -webkit-tap-highlight-color: transparent;
 }
 .modal-close:hover { background: var(--surface-soft); color: var(--ink); }
 
@@ -1165,6 +1207,8 @@ h1 {
   cursor: pointer;
   text-decoration: none;
   transition: background 0.15s;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
 }
 .share-group-cta:hover { background: #000; }
 .share-group-cta.copied { background: var(--accent); }
@@ -1177,15 +1221,12 @@ h1 {
   gap: 10px;
   justify-content: space-between;
   align-items: center;
-  padding-top: 18px;
+  padding-top: 16px;
   border-top: 1px solid var(--hairline-soft);
   margin-top: 20px;
 }
 
-.modal-meta {
-  font-size: 12px;
-  color: var(--muted);
-}
+.modal-meta { font-size: 12px; color: var(--muted); }
 
 .modal-done {
   background: transparent;
@@ -1198,17 +1239,14 @@ h1 {
   border-radius: 10px;
   cursor: pointer;
   text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
 }
 .modal-done:hover { background: var(--surface-soft); border-color: var(--ink); }
 
 /* ===== Touch / mobile overrides =========================================== */
 
 @media (hover: none) {
-  .bill-card:hover {
-    border-color: var(--hairline);
-    box-shadow: none;
-  }
-  /* Hide × on mobile — clean layout, deletion is a desktop action */
+  .bill-card:hover { border-color: var(--hairline); box-shadow: none; }
   .row-delete { display: none; }
   .tab:hover { color: var(--muted); background: transparent; }
   .tab-add:hover { color: var(--muted); border-color: var(--hairline); }
@@ -1222,7 +1260,6 @@ h1 {
   body:not(.login-page):not(.share-page) { background: var(--canvas); }
 }
 
-/* Login: card on desktop, full-bleed on mobile */
 body.login-page { background: var(--page); }
 @media (min-width: 540px) {
   body.login-page {
@@ -1240,7 +1277,6 @@ body.login-page { background: var(--page); }
   }
 }
 
-/* Share page: paper body + centered shell on desktop, full-bleed on mobile */
 body.share-page { background: var(--paper-body); min-height: 100vh; }
 @media (min-width: 540px) {
   body.share-page {
@@ -1252,10 +1288,6 @@ body.share-page { background: var(--paper-body); min-height: 100vh; }
 }
 @media (max-width: 540px) {
   body.share-page { background: var(--paper); }
-  body.share-page .share-shell {
-    box-shadow: none;
-    margin: 0;
-    max-width: 100%;
-  }
+  body.share-page .share-shell { box-shadow: none; margin: 0; max-width: 100%; }
   body.share-page .share-shell::after { display: none; }
 }

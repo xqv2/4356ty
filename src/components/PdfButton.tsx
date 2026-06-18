@@ -30,7 +30,7 @@ export default function PdfButton({ attached, onUpload, onView }: PdfButtonProps
   };
 
   return (
-    <>
+    <div className="pdf-btn-wrap">
       <button
         type="button"
         className={attached ? 'pdf-btn attached' : 'pdf-btn'}
@@ -58,6 +58,6 @@ export default function PdfButton({ attached, onUpload, onView }: PdfButtonProps
         hidden
         onChange={handleChange}
       />
-    </>
+    </div>
   );
 }

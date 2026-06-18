@@ -46,6 +46,7 @@ textarea,
 select {
   font: inherit;
   color: inherit;
+  -webkit-tap-highlight-color: transparent;
 }
 
 button {
@@ -88,6 +89,12 @@ select:focus-visible {
 :focus-visible {
   outline: 2px solid var(--ink);
   outline-offset: 2px;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--muted);
+  opacity: 1;
 }
 
 /* Hide native number-input spinners — money inputs handle their own formatting */
