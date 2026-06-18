@@ -5,7 +5,6 @@ import { formatMoney } from '@/lib/format';
 
 const DURATION_MS = 600;
 
-// Cubic ease-out — fast at the start, settles at the end. The Apple-y feel.
 const easeOut = (t: number) => 1 - Math.pow(1 - t, 3);
 
 export interface AnimatedAmountProps {
