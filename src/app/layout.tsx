@@ -11,6 +11,11 @@ import './globals.css';
 export const metadata: Metadata = {
   title: 'Bills',
   description: 'Split monthly utilities with roommates.',
+  icons: {
+    icon: '/icon-512.png',
+    apple: '/icon-512.png',
+  },
+  manifest: '/manifest.json',
 };
 
 export const viewport = {
@@ -32,6 +37,11 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&family=Libre+Barcode+39&display=swap"
           rel="stylesheet"
         />
+        <meta name="theme-color" content="#ffffff" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="apple-mobile-web-app-title" content="Bills" />
+        <link rel="apple-touch-icon" href="/icon-512.png" />
       </head>
       <body>{children}</body>
     </html>
