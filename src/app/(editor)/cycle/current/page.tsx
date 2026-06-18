@@ -6,5 +6,5 @@ export const dynamic = 'force-dynamic';
 
 export default async function CurrentCyclePage() {
   const cycle = await ensureCurrentCycle();
-  redirect(`/cycle/${cycle.id}`);
+  redirect(`/cycle/${cycle.year}-${String(cycle.month).padStart(2, '0')}`);
 }

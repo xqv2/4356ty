@@ -114,12 +114,13 @@ export default function MonthTabs({
           );
         }
         const { cycle } = item;
-        const isActive = cycle.id === activeId;
+        const cycleSlug = `${cycle.year}-${String(cycle.month).padStart(2, '0')}`;
+        const isActive = cycleSlug === activeId;
         const label = MONTH_SHORT[cycle.month - 1] ?? '';
         return (
           <Link
             key={cycle.id}
-            href={`/cycle/${cycle.id}`}
+            href={`/cycle/${cycleSlug}`}
             className={isActive ? 'tab active' : 'tab'}
             aria-current={isActive ? 'page' : undefined}
           >

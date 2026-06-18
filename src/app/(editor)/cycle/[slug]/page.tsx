@@ -1,4 +1,4 @@
-// src/app/(editor)/cycle/[id]/page.tsx
+// src/app/(editor)/cycle/[slug]/page.tsx
 import { notFound } from 'next/navigation';
 import EditorBody from '@/components/EditorBody';
 import { formatCycleLabel } from '@/lib/format';
@@ -8,21 +8,36 @@ import type { Bill, Cycle, CycleSplit, Roommate, ShareToken } from '@/lib/types'
 export const dynamic = 'force-dynamic';
 
 interface PageProps {
-  params: Promise<{ id: string }>;
+  params: Promise<{ slug: string }>;
 }
 
 export default async function CycleEditorPage({ params }: PageProps) {
-  const { id } = await params;
+  const { slug } = await params;
+  // slug format: "YYYY-MM", e.g. "2026-04"
+  const [yearStr, monthStr] = slug.split('-');
+  const year = parseInt(yearStr ?? '', 10);
+  const month = parseInt(monthStr ?? '', 10);
+
+  if (!year || !month || month < 1 || month > 12) notFound();
+
   const supabase = createServiceClient();
   const userId = getAdminUserId();
 
-  const [cycleRes, billsRes, roommatesRes, splitsRes, tokensRes] =
+  const cycleRes = await supabase
+    .from('cycles')
+    .select('id, user_id, label, year, month, created_at')
+    .eq('user_id', userId)
+    .eq('year', year)
+    .eq('month', month)
+    .maybeSingle();
+
+  if (!cycleRes.data) notFound();
+
+  const cycle = cycleRes.data as Cycle;
+  const id = cycle.id;
+
+  const [billsRes, roommatesRes, splitsRes, tokensRes] =
     await Promise.all([
-      supabase
-        .from('cycles')
-        .select('id, user_id, label, year, month, created_at')
-        .eq('id', id)
-        .maybeSingle(),
       supabase
         .from('bills')
         .select(
@@ -48,9 +63,6 @@ export default async function CycleEditorPage({ params }: PageProps) {
         .eq('cycle_id', id),
     ]);
 
-  if (!cycleRes.data) notFound();
-
-  const cycle = cycleRes.data as Cycle;
   const bills = (billsRes.data ?? []) as Bill[];
   const roommates = (roommatesRes.data ?? []) as Roommate[];
   const splits = (splitsRes.data ?? []) as CycleSplit[];

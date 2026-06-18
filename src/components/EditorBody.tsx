@@ -9,21 +9,22 @@
 // inside useTransition; if any of those throw (e.g. placeholder Supabase
 // creds while building locally), the optimistic UI stays put.
 
-import { useMemo, useState, useTransition, type ReactNode } from 'react';
+import { useMemo, useState, useTransition, useCallback, useRef, type ReactNode } from 'react';
 
 import BillCard from './BillCard';
 import RoommateRow from './RoommateRow';
 import SummaryBlock from './SummaryBlock';
-import MessagePreview from './MessagePreview';
 
 import { computeSplit } from '@/lib/split';
 import { formatMoney } from '@/lib/format';
+import { generateMessage } from '@/lib/message';
 
 import type {
   Bill,
   Cycle,
   CycleSplit,
   Roommate,
+  RoommateSplit,
   ShareToken,
 } from '@/lib/types';
 
@@ -38,8 +39,9 @@ import {
   saveRoommate as saveRoommateAction,
   setOverride as setOverrideAction,
 } from '@/actions/roommates';
+import { generateShareLinks } from '@/actions/share';
 
-import ShareLinksLauncher from '@/app/(editor)/cycle/[id]/_share-launcher';
+import ShareLinksLauncher from '@/app/(editor)/cycle/[slug]/_share-launcher';
 
 export interface EditorBodyProps {
   cycle: Cycle;
@@ -63,6 +65,17 @@ export default function EditorBody({
   const [roommates, setRoommates] = useState<Roommate[]>(initialRoommates);
   const [splits, setSplits] = useState<CycleSplit[]>(initialSplits);
   const [, startTransition] = useTransition();
+
+  // Share URL per roommate — seeded from server-loaded tokens, updated after generating.
+  const [urlByRoommate, setUrlByRoommate] = useState<Map<string, string>>(() => {
+    const m = new Map<string, string>();
+    const base = typeof window !== 'undefined' ? window.location.origin : '';
+    for (const t of activeTokens) {
+      m.set(t.roommate_id, `${base}/share/${t.token}`);
+    }
+    return m;
+  });
+  const generatingRef = useRef(false);
 
   // ---- derived ---------------------------------------------------------------
   const totalCents = useMemo(
@@ -108,6 +121,59 @@ export default function EditorBody({
       animal: 'otter',
     };
   }
+
+  const buildRoommateSplits = useCallback((): RoommateSplit[] => {
+    return roommates.map((r) => {
+      const s = splitsByRoommate.get(r.id);
+      const cents = computed.perRoommate.find((p) => p.id === r.id)?.cents ?? 0;
+      let override: RoommateSplit['override'] = null;
+      if (s?.override_cents != null && s.override_cents > 0) {
+        override = { kind: 'cents', cents: s.override_cents };
+      } else if (s?.override_percent != null) {
+        const saved = Math.max(0, computed.equalShareCents - cents);
+        override = { kind: 'percent', percent: s.override_percent, saved_cents: saved };
+      }
+      return { roommate_id: r.id, name: r.name, cents, equal_share_cents: computed.equalShareCents, is_payer: false, override, tag: null };
+    });
+  }, [roommates, splitsByRoommate, computed]);
+
+  const handleCopyMessage = useCallback(async (roommateId: string) => {
+    if (demoMode) return;
+    let url = urlByRoommate.get(roommateId);
+    // Generate links if this roommate doesn't have one yet.
+    if (!url && !generatingRef.current) {
+      generatingRef.current = true;
+      try {
+        const results = await generateShareLinks(cycle.id);
+        const base = typeof window !== 'undefined' ? window.location.origin : '';
+        setUrlByRoommate((prev) => {
+          const next = new Map(prev);
+          for (const r of results) next.set(r.roommateId, r.url || `${base}/share/${r.token}`);
+          return next;
+        });
+        url = results.find((r) => r.roommateId === roommateId)?.url ?? undefined;
+      } catch (e) {
+        console.error('generateShareLinks failed', e);
+      } finally {
+        generatingRef.current = false;
+      }
+    }
+    const roommateSplits = buildRoommateSplits();
+    const target = roommateSplits.find((s) => s.roommate_id === roommateId);
+    const message = generateMessage(cycle, bills, roommateSplits, target);
+    const text = url ? `${message}\n\n${url}` : message;
+    try {
+      await navigator.clipboard.writeText(text);
+    } catch {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.cssText = 'position:fixed;left:-9999px';
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+    }
+  }, [cycle, bills, urlByRoommate, buildRoommateSplits, demoMode]);
 
   // ---- handlers --------------------------------------------------------------
 
@@ -297,6 +363,7 @@ export default function EditorBody({
               computedAmountCents={owedCents}
               onSave={(patch) => handleRoommateSave(r.id, patch)}
               onDelete={() => handleRoommateDelete(r.id)}
+              onCopyMessage={() => { void handleCopyMessage(r.id); }}
             />
           );
         })}
@@ -310,16 +377,6 @@ export default function EditorBody({
           + Add roommate
         </button>
       </div>
-
-      {totalCents > 0 && roommateCount > 0 ? (
-        <MessagePreview
-          cycle={cycle}
-          bills={bills}
-          roommates={roommates}
-          splits={splits}
-          computedSplit={computed}
-        />
-      ) : null}
 
       <ShareLinksLauncher
         cycleId={cycle.id}

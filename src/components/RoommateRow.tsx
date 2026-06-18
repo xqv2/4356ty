@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import type { CycleSplit, Roommate } from '@/lib/types';
-
 /** Patch shape emitted by RoommateRow. Any subset of these fields may be
  *  passed to onSave. Use `null` to clear an override field. */
 export interface RoommateRowPatch {
@@ -18,6 +17,7 @@ export interface RoommateRowProps {
   computedAmountCents: number;
   onSave: (patch: RoommateRowPatch) => void;
   onDelete: () => void;
+  onCopyMessage?: () => void;
   isLandlord?: boolean;
 }
 
@@ -57,11 +57,14 @@ export default function RoommateRow({
   computedAmountCents,
   onSave,
   onDelete,
+  onCopyMessage,
   isLandlord,
 }: RoommateRowProps) {
   // Local-controlled name so typing feels instant; commit on blur / Enter.
   const [name, setName] = useState(roommate.name);
   useEffect(() => setName(roommate.name), [roommate.name]);
+
+  const [copied, setCopied] = useState(false);
 
   const hasPercent =
     split.override_percent !== null && split.override_percent !== undefined;
@@ -159,6 +162,31 @@ export default function RoommateRow({
         />
       ) : (
         <span className="roommate-amount">{formatCents(computedAmountCents)}</span>
+      )}
+
+      {onCopyMessage && (
+        <button
+          type="button"
+          className={copied ? 'msg-copy-btn copied' : 'msg-copy-btn'}
+          title={copied ? 'Copied!' : `Copy message for ${roommate.name}`}
+          aria-label={copied ? 'Copied' : `Copy message for ${roommate.name}`}
+          onClick={() => {
+            onCopyMessage();
+            setCopied(true);
+            window.setTimeout(() => setCopied(false), 1600);
+          }}
+        >
+          {copied ? (
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M20 6 9 17l-5-5" />
+            </svg>
+          ) : (
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <rect x={9} y={9} width={13} height={13} rx={2} />
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+            </svg>
+          )}
+        </button>
       )}
     </div>
   );

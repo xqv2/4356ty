@@ -15,7 +15,7 @@ import { usePathname } from 'next/navigation';
 import MonthTabs from '@/components/MonthTabs';
 import type { Cycle } from '@/lib/types';
 
-const CYCLE_ID_RE = /^\/cycle\/([^/]+)/;
+const CYCLE_ID_RE = /^\/cycle\/(\d{4}-\d{2})\b/;
 
 export interface EditorChromeProps {
   cycles: Cycle[];

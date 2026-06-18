@@ -28,8 +28,8 @@ const SAMPLE_MONTHS: Array<{
     bills: [
       { vendor: 'Electricity', kind: 'electricity', amount_cents: 14500 },
       { vendor: 'Water',       kind: 'water',       amount_cents: 3800  },
-      { vendor: 'Trash',       kind: 'trash',       amount_cents: 2800  },
-      { vendor: 'Internet',    kind: 'internet',    amount_cents: 6000  },
+      { vendor: 'Trash',       kind: 'trash',       amount_cents: 4400  },
+      { vendor: 'Internet',    kind: 'internet',    amount_cents: 4900  },
     ],
   },
   {
@@ -37,8 +37,8 @@ const SAMPLE_MONTHS: Array<{
     bills: [
       { vendor: 'Electricity', kind: 'electricity', amount_cents: 15200 },
       { vendor: 'Water',       kind: 'water',       amount_cents: 3500  },
-      { vendor: 'Trash',       kind: 'trash',       amount_cents: 2800  },
-      { vendor: 'Internet',    kind: 'internet',    amount_cents: 6000  },
+      { vendor: 'Trash',       kind: 'trash',       amount_cents: 4400  },
+      { vendor: 'Internet',    kind: 'internet',    amount_cents: 4900  },
     ],
   },
   {
@@ -46,8 +46,8 @@ const SAMPLE_MONTHS: Array<{
     bills: [
       { vendor: 'Electricity', kind: 'electricity', amount_cents: 11800 },
       { vendor: 'Water',       kind: 'water',       amount_cents: 4200  },
-      { vendor: 'Trash',       kind: 'trash',       amount_cents: 2800  },
-      { vendor: 'Internet',    kind: 'internet',    amount_cents: 6000  },
+      { vendor: 'Trash',       kind: 'trash',       amount_cents: 4400  },
+      { vendor: 'Internet',    kind: 'internet',    amount_cents: 4900  },
     ],
   },
   {
@@ -55,8 +55,8 @@ const SAMPLE_MONTHS: Array<{
     bills: [
       { vendor: 'Electricity', kind: 'electricity', amount_cents: 9800  },
       { vendor: 'Water',       kind: 'water',       amount_cents: 4500  },
-      { vendor: 'Trash',       kind: 'trash',       amount_cents: 2800  },
-      { vendor: 'Internet',    kind: 'internet',    amount_cents: 6000  },
+      { vendor: 'Trash',       kind: 'trash',       amount_cents: 4400  },
+      { vendor: 'Internet',    kind: 'internet',    amount_cents: 4900  },
     ],
   },
 ];
@@ -254,8 +254,8 @@ export async function createNextCycle(): Promise<void> {
   if (lokeshId) await seedLokeshDiscount(supabase, newCycle.id, lokeshId);
 
   revalidatePath('/cycle/current');
-  revalidatePath(`/cycle/${newCycle.id}`);
-  redirect(`/cycle/${newCycle.id}`);
+  revalidatePath(`/cycle/${newCycle.year}-${String(newCycle.month).padStart(2, '0')}`);
+  redirect(`/cycle/${newCycle.year}-${String(newCycle.month).padStart(2, '0')}`);
 }
 
 export async function createCycle(year: number, month: number, label?: string): Promise<Cycle> {

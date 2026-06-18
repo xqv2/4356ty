@@ -343,6 +343,26 @@ h1 {
 .roommate-row:hover .row-delete { opacity: 1; }
 .row-delete:hover { color: var(--accent); background: var(--surface-soft); }
 
+.msg-copy-btn {
+  border: none;
+  background: none;
+  color: var(--muted-soft);
+  cursor: pointer;
+  padding: 0;
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  border-radius: 6px;
+  opacity: 0;
+  transition: opacity 0.15s, color 0.15s, background 0.15s;
+  flex-shrink: 0;
+}
+.msg-copy-btn svg { width: 14px; height: 14px; }
+.roommate-row:hover .msg-copy-btn { opacity: 1; }
+.msg-copy-btn:hover { color: var(--text); background: var(--surface-soft); }
+.msg-copy-btn.copied { opacity: 1; color: var(--accent); }
+
 /* ===== Add row ============================================================ */
 
 .add-bill,
