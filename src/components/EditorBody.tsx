@@ -1,0 +1,336 @@
+'use client';
+
+// src/components/EditorBody.tsx
+// Client-side shell of the cycle editor. Holds bills/roommates/splits in
+// React state so editing a bill amount or override recomputes the total
+// locally on the same tick — no server round-trip required for the UI to
+// react. Persistence still happens via server actions (saveBill,
+// saveRoommate, setOverride, deleteBill, removeRoommate, attachPdf), fired
+// inside useTransition; if any of those throw (e.g. placeholder Supabase
+// creds while building locally), the optimistic UI stays put.
+
+import { useMemo, useState, useTransition, type ReactNode } from 'react';
+
+import BillCard from './BillCard';
+import RoommateRow from './RoommateRow';
+import SummaryBlock from './SummaryBlock';
+import MessagePreview from './MessagePreview';
+
+import { computeSplit } from '@/lib/split';
+import { formatMoney } from '@/lib/format';
+
+import type {
+  Bill,
+  Cycle,
+  CycleSplit,
+  Roommate,
+  ShareToken,
+} from '@/lib/types';
+
+import type { BillPatch } from '@/actions/bills';
+import {
+  attachPdf as attachPdfAction,
+  deleteBill as deleteBillAction,
+  saveBill as saveBillAction,
+} from '@/actions/bills';
+import {
+  removeRoommate as removeRoommateAction,
+  saveRoommate as saveRoommateAction,
+  setOverride as setOverrideAction,
+} from '@/actions/roommates';
+
+import ShareLinksLauncher from '@/app/(editor)/cycle/[id]/_share-launcher';
+
+export interface EditorBodyProps {
+  cycle: Cycle;
+  initialBills: Bill[];
+  initialRoommates: Roommate[];
+  initialSplits: CycleSplit[];
+  activeTokens: ShareToken[];
+  /** When true, skips all server-action persistence — useful for /demo and tests. */
+  demoMode?: boolean;
+}
+
+export default function EditorBody({
+  cycle,
+  initialBills,
+  initialRoommates,
+  initialSplits,
+  activeTokens,
+  demoMode = false,
+}: EditorBodyProps): ReactNode {
+  const [bills, setBills] = useState<Bill[]>(initialBills);
+  const [roommates, setRoommates] = useState<Roommate[]>(initialRoommates);
+  const [splits, setSplits] = useState<CycleSplit[]>(initialSplits);
+  const [, startTransition] = useTransition();
+
+  // ---- derived ---------------------------------------------------------------
+  const totalCents = useMemo(
+    () => bills.reduce((s, b) => s + (b.amount_cents || 0), 0),
+    [bills],
+  );
+
+  const splitsByRoommate = useMemo(() => {
+    const m = new Map<string, CycleSplit>();
+    for (const s of splits) m.set(s.roommate_id, s);
+    return m;
+  }, [splits]);
+
+  const computed = useMemo(
+    () =>
+      computeSplit(
+        totalCents,
+        roommates.map((r) => {
+          const s = splitsByRoommate.get(r.id);
+          return {
+            id: r.id,
+            override_cents: s?.override_cents ?? null,
+            override_percent: s?.override_percent ?? null,
+          };
+        }),
+      ),
+    [totalCents, roommates, splitsByRoommate],
+  );
+
+  const roommateCount = roommates.length;
+  const billCount = bills.length;
+  const billsMeta = `${billCount} item${billCount === 1 ? '' : 's'} · ${formatMoney(totalCents)}`;
+  const ctaDisabled = totalCents === 0 || roommateCount === 0;
+
+  function splitForRoommate(r: Roommate): CycleSplit {
+    const existing = splitsByRoommate.get(r.id);
+    if (existing) return existing;
+    return {
+      cycle_id: cycle.id,
+      roommate_id: r.id,
+      override_cents: null,
+      override_percent: null,
+      animal: 'otter',
+    };
+  }
+
+  // ---- handlers --------------------------------------------------------------
+
+  function handleBillSave(billId: string, patch: Partial<Bill>) {
+    setBills((prev) =>
+      prev.map((b) => (b.id === billId ? { ...b, ...patch } : b)),
+    );
+    if (demoMode) return;
+    startTransition(async () => {
+      try {
+        await saveBillAction(billId, patch as BillPatch);
+      } catch (e) {
+        console.error('saveBill failed', e);
+      }
+    });
+  }
+
+  function handleBillDelete(billId: string) {
+    setBills((prev) => prev.filter((b) => b.id !== billId));
+    if (demoMode) return;
+    startTransition(async () => {
+      try {
+        await deleteBillAction(billId);
+      } catch (e) {
+        console.error('deleteBill failed', e);
+      }
+    });
+  }
+
+  function handleBillAttach(billId: string, file: File) {
+    if (demoMode) {
+      // In demo mode, just flip pdf_path locally so the button turns Rausch.
+      setBills((prev) =>
+        prev.map((b) =>
+          b.id === billId
+            ? { ...b, pdf_path: `demo/${billId}/${file.name}` }
+            : b,
+        ),
+      );
+      return;
+    }
+    startTransition(async () => {
+      try {
+        const updated = await attachPdfAction(billId, file);
+        setBills((prev) =>
+          prev.map((b) => (b.id === billId ? updated : b)),
+        );
+      } catch (e) {
+        console.error('attachPdf failed', e);
+      }
+    });
+  }
+
+  function handleRoommateSave(
+    roommateId: string,
+    patch: {
+      name?: string;
+      override_cents?: number | null;
+      override_percent?: number | null;
+    },
+  ) {
+    if (typeof patch.name === 'string') {
+      const name = patch.name;
+      setRoommates((prev) =>
+        prev.map((r) => (r.id === roommateId ? { ...r, name } : r)),
+      );
+      if (!demoMode) {
+        startTransition(async () => {
+          try {
+            await saveRoommateAction(roommateId, { name });
+          } catch (e) {
+            console.error('saveRoommate failed', e);
+          }
+        });
+      }
+    }
+    if (
+      patch.override_cents !== undefined ||
+      patch.override_percent !== undefined
+    ) {
+      setSplits((prev) => {
+        const has = prev.find((s) => s.roommate_id === roommateId);
+        const next: CycleSplit = {
+          cycle_id: cycle.id,
+          roommate_id: roommateId,
+          override_cents: patch.override_cents ?? has?.override_cents ?? null,
+          override_percent:
+            patch.override_percent !== undefined
+              ? patch.override_percent
+              : (has?.override_percent ?? null),
+          animal: has?.animal ?? 'otter',
+        };
+        // Mutual exclusion: setting one clears the other.
+        if (patch.override_cents !== undefined && patch.override_cents !== null) {
+          next.override_percent = null;
+        }
+        if (
+          patch.override_percent !== undefined &&
+          patch.override_percent !== null
+        ) {
+          next.override_cents = null;
+        }
+        if (has) {
+          return prev.map((s) =>
+            s.roommate_id === roommateId ? next : s,
+          );
+        }
+        return [...prev, next];
+      });
+      startTransition(async () => {
+        if (demoMode) return;
+        try {
+          await setOverrideAction(cycle.id, roommateId, {
+            override_cents: patch.override_cents,
+            override_percent: patch.override_percent,
+          });
+        } catch (e) {
+          console.error('setOverride failed', e);
+        }
+      });
+    }
+  }
+
+  function handleRoommateDelete(roommateId: string) {
+    setRoommates((prev) => prev.filter((r) => r.id !== roommateId));
+    setSplits((prev) => prev.filter((s) => s.roommate_id !== roommateId));
+    if (demoMode) return;
+    startTransition(async () => {
+      try {
+        await removeRoommateAction(roommateId);
+      } catch (e) {
+        console.error('removeRoommate failed', e);
+      }
+    });
+  }
+
+  // ---- render ----------------------------------------------------------------
+  return (
+    <>
+      <div className="section">
+        <div className="section-head">
+          <div className="section-title">Bills</div>
+          <div className="section-meta">{billsMeta}</div>
+        </div>
+
+        {bills.map((bill) => (
+          <BillCard
+            key={bill.id}
+            bill={bill}
+            onSave={(patch) => handleBillSave(bill.id, patch)}
+            onDelete={() => handleBillDelete(bill.id)}
+            onAttachPdf={(file) => handleBillAttach(bill.id, file)}
+          />
+        ))}
+
+        <button
+          type="button"
+          className="add-bill"
+          disabled
+          aria-disabled="true"
+        >
+          + Add bill
+        </button>
+      </div>
+
+      <div className="section">
+        <SummaryBlock
+          totalCents={totalCents}
+          roommateCount={Math.max(1, roommateCount)}
+          perPersonCents={computed.equalShareCents}
+        />
+      </div>
+
+      <div className="section">
+        <div className="section-head">
+          <div className="section-title">Roommates</div>
+        </div>
+
+        {roommates.map((r) => {
+          const owedCents =
+            computed.perRoommate.find((p) => p.id === r.id)?.cents ?? 0;
+          return (
+            <RoommateRow
+              key={r.id}
+              roommate={r}
+              split={splitForRoommate(r)}
+              computedAmountCents={owedCents}
+              onSave={(patch) => handleRoommateSave(r.id, patch)}
+              onDelete={() => handleRoommateDelete(r.id)}
+            />
+          );
+        })}
+
+        <button
+          type="button"
+          className="add-roommate"
+          disabled
+          aria-disabled="true"
+        >
+          + Add roommate
+        </button>
+      </div>
+
+      {totalCents > 0 && roommateCount > 0 ? (
+        <MessagePreview
+          cycle={cycle}
+          bills={bills}
+          roommates={roommates}
+          splits={splits}
+          computedSplit={computed}
+        />
+      ) : null}
+
+      <ShareLinksLauncher
+        cycleId={cycle.id}
+        disabled={ctaDisabled}
+        cycle={cycle}
+        bills={bills}
+        roommates={roommates}
+        splits={splits}
+        computedSplit={computed}
+        existingTokens={activeTokens}
+      />
+    </>
+  );
+}
