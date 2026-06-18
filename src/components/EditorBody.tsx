@@ -65,15 +65,8 @@ export default function EditorBody({
   const [splits, setSplits] = useState<CycleSplit[]>(initialSplits);
   const [, startTransition] = useTransition();
 
-  // Share URL per roommate — seeded from server-loaded tokens, updated after generating.
-  const [urlByRoommate, setUrlByRoommate] = useState<Map<string, string>>(() => {
-    const m = new Map<string, string>();
-    const base = typeof window !== 'undefined' ? window.location.origin : '';
-    for (const t of activeTokens) {
-      m.set(t.roommate_id, `${base}/share/${t.token}`);
-    }
-    return m;
-  });
+  // Share URL per roommate — populated on first copy via generateShareLinks (which shortens via TinyURL).
+  const [urlByRoommate, setUrlByRoommate] = useState<Map<string, string>>(new Map());
   const generatingRef = useRef(false);
 
   // ---- derived ---------------------------------------------------------------

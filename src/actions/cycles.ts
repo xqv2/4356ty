@@ -114,6 +114,25 @@ export async function ensureCurrentCycle(): Promise<Cycle> {
 
   const lokeshId = allRoommates?.find((r) => r.name === 'Lokesh')?.id ?? null;
 
+  // Ensure Lokesh's 20% discount exists on every cycle.
+  if (lokeshId) {
+    const { data: allCycles } = await supabase
+      .from('cycles')
+      .select('id')
+      .eq('user_id', userId);
+    for (const c of allCycles ?? []) {
+      const { data: existing } = await supabase
+        .from('cycle_splits')
+        .select('override_percent')
+        .eq('cycle_id', c.id)
+        .eq('roommate_id', lokeshId)
+        .maybeSingle();
+      if (!existing || existing.override_percent == null) {
+        await seedLokeshDiscount(supabase, c.id, lokeshId);
+      }
+    }
+  }
+
   // ── 2. Seed historical months if missing ────────────────────────────────
   for (const sample of SAMPLE_MONTHS) {
     const { data: existing } = await supabase
