@@ -1,7 +1,7 @@
 'use client';
 
 // src/app/login/page.tsx
-// Email + password sign-in. Single-account admin login.
+// Single-password admin gate. Email is fixed via NEXT_PUBLIC_ADMIN_EMAIL.
 
 import {
   useEffect,
@@ -12,11 +12,8 @@ import {
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
 export default function LoginPage() {
   const router = useRouter();
-  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -28,31 +25,23 @@ export default function LoginPage() {
     };
   }, []);
 
-  const clearError = () => {
-    if (error) setError(null);
-  };
-
-  const handleEmailChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setEmail(e.target.value);
-    clearError();
-  };
-
   const handlePasswordChange = (e: ChangeEvent<HTMLInputElement>) => {
     setPassword(e.target.value);
-    clearError();
+    if (error) setError(null);
   };
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (pending) return;
 
-    const trimmed = email.trim();
-    if (!EMAIL_RE.test(trimmed)) {
-      setError('Please enter a valid email address.');
+    if (!password) {
+      setError('Please enter the password.');
       return;
     }
-    if (!password) {
-      setError('Please enter your password.');
+
+    const adminEmail = process.env.NEXT_PUBLIC_ADMIN_EMAIL;
+    if (!adminEmail) {
+      setError('Login is not configured. Set NEXT_PUBLIC_ADMIN_EMAIL.');
       return;
     }
 
@@ -62,11 +51,11 @@ export default function LoginPage() {
     try {
       const supabase = createClient();
       const { error: signInError } = await supabase.auth.signInWithPassword({
-        email: trimmed,
+        email: adminEmail,
         password,
       });
       if (signInError) {
-        setError(signInError.message);
+        setError('Wrong password.');
         setPending(false);
         return;
       }
@@ -89,24 +78,8 @@ export default function LoginPage() {
           Bills<span className="dot">.</span>
         </div>
         <h1>Sign in</h1>
-        <div className="cycle-label" style={{ marginTop: 8 }}>
-          welcome back
-        </div>
       </div>
       <form className="login-form" onSubmit={handleSubmit} noValidate>
-        <input
-          type="email"
-          name="email"
-          value={email}
-          onChange={handleEmailChange}
-          placeholder="your@email.com"
-          autoComplete="email"
-          inputMode="email"
-          autoFocus
-          disabled={pending}
-          aria-invalid={error ? 'true' : undefined}
-          aria-label="Email address"
-        />
         <input
           type="password"
           name="password"
@@ -114,15 +87,15 @@ export default function LoginPage() {
           onChange={handlePasswordChange}
           placeholder="Password"
           autoComplete="current-password"
+          autoFocus
           disabled={pending}
           aria-invalid={error ? 'true' : undefined}
           aria-label="Password"
-          style={{ marginTop: 12 }}
         />
         <button
           type="submit"
           className="cta-inline"
-          disabled={pending || !email.trim() || !password}
+          disabled={pending || !password}
         >
           {pending ? 'Signing in…' : 'Sign in'}
         </button>
