@@ -158,7 +158,7 @@ export default function EditorBody({
     const roommateSplits = buildRoommateSplits();
     const target = roommateSplits.find((s) => s.roommate_id === roommateId);
     const message = generateMessage(cycle, bills, roommateSplits, target);
-    const text = url ? `${message}\n\n${url}` : message;
+    const text = url ? `${message}\n\nBreakdown:\n${url}` : message;
     try {
       await navigator.clipboard.writeText(text);
     } catch {
