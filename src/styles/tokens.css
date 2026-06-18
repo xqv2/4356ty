@@ -67,16 +67,17 @@
 }
 
 .app {
-  padding: 0 24px 132px;
+  padding: 0 24px 32px;
 }
 
 /* ===== Month tabs ========================================================= */
 
 .month-tabs {
   position: sticky;
-  top: 0;
+  bottom: 0;
   background: var(--canvas);
-  border-bottom: 1px solid var(--hairline);
+  border-top: 1px solid var(--hairline);
+  border-bottom: none;
   padding: 12px 24px;
   display: flex;
   align-items: center;
@@ -140,7 +141,29 @@
 
 /* ===== Header ============================================================= */
 
-.header { padding: 24px 0 28px; }
+.header {
+  padding: 24px 0 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.share-fab {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  transition: opacity 0.15s;
+}
+.share-fab:disabled { opacity: 0.4; cursor: default; }
+.share-fab:not(:disabled):hover { opacity: 0.88; }
 
 .cycle-label {
   font-size: 12px;
@@ -346,7 +369,7 @@ h1 {
 .msg-copy-btn {
   border: none;
   background: none;
-  color: var(--muted-soft);
+  color: var(--muted);
   cursor: pointer;
   padding: 0;
   width: 28px;
@@ -354,14 +377,13 @@ h1 {
   display: grid;
   place-items: center;
   border-radius: 6px;
-  opacity: 0;
+  opacity: 1;
   transition: opacity 0.15s, color 0.15s, background 0.15s;
   flex-shrink: 0;
 }
 .msg-copy-btn svg { width: 14px; height: 14px; }
-.roommate-row:hover .msg-copy-btn { opacity: 1; }
 .msg-copy-btn:hover { color: var(--text); background: var(--surface-soft); }
-.msg-copy-btn.copied { opacity: 1; color: var(--accent); }
+.msg-copy-btn.copied { color: var(--accent); }
 
 /* ===== Add row ============================================================ */
 

@@ -94,6 +94,7 @@ export async function ensureCurrentCycle(): Promise<Cycle> {
       { user_id: userId, name: 'Lokesh',  position: 0 },
       { user_id: userId, name: 'Astitva', position: 1 },
       { user_id: userId, name: 'Bob',     position: 2 },
+      { user_id: userId, name: 'Johny',   position: 3 },
     ]);
   }
 

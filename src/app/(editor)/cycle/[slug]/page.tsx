@@ -1,7 +1,6 @@
 // src/app/(editor)/cycle/[slug]/page.tsx
 import { notFound } from 'next/navigation';
 import EditorBody from '@/components/EditorBody';
-import { formatCycleLabel } from '@/lib/format';
 import { createServiceClient, getAdminUserId } from '@/lib/supabase/service';
 import type { Bill, Cycle, CycleSplit, Roommate, ShareToken } from '@/lib/types';
 
@@ -69,20 +68,13 @@ export default async function CycleEditorPage({ params }: PageProps) {
   const tokens = (tokensRes.data ?? []) as ShareToken[];
   const activeTokens = tokens.filter((t) => Date.parse(t.expires_at) > Date.now());
 
-  const monthName = formatCycleLabel(cycle.year, cycle.month).split(' ')[0];
-
   return (
-    <>
-      <div className="header">
-        <h1>{monthName} Split</h1>
-      </div>
-      <EditorBody
-        cycle={cycle}
-        initialBills={bills}
-        initialRoommates={roommates}
-        initialSplits={splits}
-        activeTokens={activeTokens}
-      />
-    </>
+    <EditorBody
+      cycle={cycle}
+      initialBills={bills}
+      initialRoommates={roommates}
+      initialSplits={splits}
+      activeTokens={activeTokens}
+    />
   );
 }

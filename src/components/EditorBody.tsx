@@ -40,7 +40,7 @@ import {
   setOverride as setOverrideAction,
 } from '@/actions/roommates';
 import { generateShareLinks } from '@/actions/share';
-
+import { formatCycleLabel } from '@/lib/format';
 import ShareLinksLauncher from '@/app/(editor)/cycle/[slug]/_share-launcher';
 
 export interface EditorBodyProps {
@@ -106,7 +106,6 @@ export default function EditorBody({
   );
 
   const roommateCount = roommates.length;
-  const ctaDisabled = totalCents === 0 || roommateCount === 0;
 
   function splitForRoommate(r: Roommate): CycleSplit {
     const existing = splitsByRoommate.get(r.id);
@@ -335,8 +334,26 @@ export default function EditorBody({
   }
 
   // ---- render ----------------------------------------------------------------
+  const monthName = formatCycleLabel(cycle.year, cycle.month).split(' ')[0];
+  const ctaDisabled = totalCents === 0 || roommateCount === 0;
+
   return (
     <>
+      <div className="header">
+        <h1>{monthName} Split</h1>
+        <ShareLinksLauncher
+          cycleId={cycle.id}
+          disabled={ctaDisabled}
+          cycle={cycle}
+          bills={bills}
+          roommates={roommates}
+          splits={splits}
+          computedSplit={computed}
+          existingTokens={activeTokens}
+          asFab
+        />
+      </div>
+
       <div className="section">
         <div className="section-head">
           <div className="section-title">Bills</div>
@@ -387,6 +404,7 @@ export default function EditorBody({
               onSave={(patch) => handleRoommateSave(r.id, patch)}
               onDelete={() => handleRoommateDelete(r.id)}
               onCopyMessage={() => { void handleCopyMessage(r.id); }}
+              isLandlord={r.name.toLowerCase() === 'johny'}
             />
           );
         })}
@@ -399,17 +417,9 @@ export default function EditorBody({
           + Add roommate
         </button>
       </div>
-
-      <ShareLinksLauncher
-        cycleId={cycle.id}
-        disabled={ctaDisabled}
-        cycle={cycle}
-        bills={bills}
-        roommates={roommates}
-        splits={splits}
-        computedSplit={computed}
-        existingTokens={activeTokens}
-      />
+    </>
+  );
+}
     </>
   );
 }
