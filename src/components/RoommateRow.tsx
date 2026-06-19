@@ -14,7 +14,6 @@ export interface RoommateRowProps {
   split: CycleSplit;
   computedAmountCents: number;
   onSave: (patch: RoommateRowPatch) => void;
-  onDelete: () => void;
   onCopyMessage?: () => void;
   isLandlord?: boolean;
 }
@@ -47,7 +46,6 @@ export default function RoommateRow({
   split,
   computedAmountCents,
   onSave,
-  onDelete: _onDelete,
   onCopyMessage,
   isLandlord,
 }: RoommateRowProps) {

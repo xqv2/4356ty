@@ -35,7 +35,6 @@ import {
 } from '@/actions/bills';
 import {
   addRoommate as addRoommateAction,
-  removeRoommate as removeRoommateAction,
   saveRoommate as saveRoommateAction,
   setOverride as setOverrideAction,
 } from '@/actions/roommates';
@@ -112,8 +111,6 @@ export default function EditorBody({
       ),
     [totalCents, roommates, splitsByRoommate],
   );
-
-  const roommateCount = roommates.length;
 
   function splitForRoommate(r: Roommate): CycleSplit {
     const existing = splitsByRoommate.get(r.id);
@@ -343,19 +340,6 @@ export default function EditorBody({
     });
   }
 
-  function handleRoommateDelete(roommateId: string) {
-    setRoommates((prev) => prev.filter((r) => r.id !== roommateId));
-    setSplits((prev) => prev.filter((s) => s.roommate_id !== roommateId));
-    if (demoMode) return;
-    startTransition(async () => {
-      try {
-        await removeRoommateAction(roommateId);
-      } catch (e) {
-        console.error('removeRoommate failed', e);
-      }
-    });
-  }
-
   // ---- render ----------------------------------------------------------------
   const monthName = formatCycleLabel(cycle.year, cycle.month).split(' ')[0];
 
@@ -395,7 +379,6 @@ export default function EditorBody({
       <div className="section">
         <SummaryBlock
           totalCents={totalCents}
-          roommateCount={Math.max(1, roommateCount)}
           perPersonCents={computed.equalShareCents}
         />
       </div>
@@ -426,7 +409,6 @@ export default function EditorBody({
                 split={splitForRoommate(r)}
                 computedAmountCents={owedCents}
                 onSave={(patch) => handleRoommateSave(r.id, patch)}
-                onDelete={() => handleRoommateDelete(r.id)}
                 onCopyMessage={() => { handleCopyMessage(r.id); }}
                 isLandlord={r.name.toLowerCase() === 'johny'}
               />

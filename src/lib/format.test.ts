@@ -8,7 +8,6 @@ import {
   formatCycleLabel,
   formatMoney,
   formatMonthName,
-  formatTabLabel,
   parseAmountToCents,
 } from './format';
 
@@ -65,31 +64,6 @@ describe('formatCycleLabel', () => {
   it('clamps non-finite months to January', () => {
     expect(formatCycleLabel(2026, Number.NaN)).toBe('January 2026');
     expect(formatCycleLabel(2026, Number.POSITIVE_INFINITY)).toBe('January 2026');
-  });
-});
-
-describe('formatTabLabel', () => {
-  it.each([
-    [1, 'JAN'],
-    [2, 'FEB'],
-    [3, 'MAR'],
-    [4, 'APR'],
-    [5, 'MAY'],
-    [6, 'JUN'],
-    [7, 'JUL'],
-    [8, 'AUG'],
-    [9, 'SEP'],
-    [10, 'OCT'],
-    [11, 'NOV'],
-    [12, 'DEC'],
-  ])('formats month %i as %s', (month, expected) => {
-    expect(formatTabLabel(month)).toBe(expected);
-  });
-
-  it('clamps out-of-range months', () => {
-    expect(formatTabLabel(0)).toBe('JAN');
-    expect(formatTabLabel(13)).toBe('DEC');
-    expect(formatTabLabel(-1)).toBe('JAN');
   });
 });
 

@@ -35,14 +35,12 @@ function makeSplit(overrides: Partial<CycleSplit> = {}): CycleSplit {
 describe('RoommateRow', () => {
   it('plain roommate (no overrides) shows avatar initial, name input, static amount, and no pills', () => {
     const onSave = vi.fn();
-    const onDelete = vi.fn();
     const { container } = render(
       <RoommateRow
         roommate={ROOMMATE}
         split={makeSplit()}
         computedAmountCents={2500}
         onSave={onSave}
-        onDelete={onDelete}
       />,
     );
 
@@ -54,8 +52,8 @@ describe('RoommateRow', () => {
     expect(nameInput).toBeInTheDocument();
     expect(nameInput.value).toBe('Alice');
 
-    // No overrides → static amount span, not the override input.
-    const amount = container.querySelector('.roommate-amount');
+    // No overrides → static amount div, not the override input.
+    const amount = container.querySelector('.roommate-card-amount');
     expect(amount).not.toBeNull();
     expect(amount?.textContent).toBe('$25.00');
     expect(container.querySelector('.override-input')).toBeNull();
@@ -73,7 +71,6 @@ describe('RoommateRow', () => {
         split={makeSplit({ override_cents: 1500 })}
         computedAmountCents={1500}
         onSave={vi.fn()}
-        onDelete={vi.fn()}
       />,
     );
 
@@ -84,8 +81,8 @@ describe('RoommateRow', () => {
     // Discount pill must NOT render when only cents override is set.
     expect(container.querySelector('.discount-pill')).toBeNull();
 
-    // Static amount span replaced by an editable input pre-filled from override_cents.
-    expect(container.querySelector('.roommate-amount')).toBeNull();
+    // Static amount div replaced by an editable input pre-filled from override_cents.
+    expect(container.querySelector('.roommate-card-amount')).toBeNull();
     const input = container.querySelector('.override-input') as HTMLInputElement | null;
     expect(input).not.toBeNull();
     expect(input?.tagName).toBe('INPUT');
@@ -101,7 +98,6 @@ describe('RoommateRow', () => {
         split={makeSplit({ override_percent: 20 })}
         computedAmountCents={2000}
         onSave={vi.fn()}
-        onDelete={vi.fn()}
       />,
     );
 
@@ -124,7 +120,6 @@ describe('RoommateRow', () => {
         split={makeSplit()}
         computedAmountCents={2500}
         onSave={vi.fn()}
-        onDelete={vi.fn()}
         isLandlord
       />,
     );

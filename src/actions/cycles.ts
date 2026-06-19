@@ -176,20 +176,22 @@ export async function ensureCurrentCycle(): Promise<Cycle> {
   }
 
   // ── 3. Enforce fixed prices for Trash ($44) and Internet ($49) everywhere ─
+  const { data: allCycleRows } = await supabase
+    .from('cycles')
+    .select('id')
+    .eq('user_id', userId);
+  const allCycleIds = allCycleRows?.map((c) => c.id) ?? [];
+
   await supabase
     .from('bills')
     .update({ amount_cents: 4400 })
     .eq('kind', 'trash')
-    .in('cycle_id',
-      (await supabase.from('cycles').select('id').eq('user_id', userId)).data?.map((c) => c.id) ?? [],
-    );
+    .in('cycle_id', allCycleIds);
   await supabase
     .from('bills')
     .update({ amount_cents: 4900 })
     .eq('kind', 'internet')
-    .in('cycle_id',
-      (await supabase.from('cycles').select('id').eq('user_id', userId)).data?.map((c) => c.id) ?? [],
-    );
+    .in('cycle_id', allCycleIds);
 
   // ── 4. Backfill missing providers on existing bills ─────────────────────
   for (const [kind, provider] of Object.entries(PROVIDER_DEFAULTS)) {
@@ -198,9 +200,7 @@ export async function ensureCurrentCycle(): Promise<Cycle> {
       .update({ provider })
       .eq('kind', kind)
       .is('provider', null)
-      .in('cycle_id',
-        (await supabase.from('cycles').select('id').eq('user_id', userId)).data?.map((c) => c.id) ?? [],
-      );
+      .in('cycle_id', allCycleIds);
   }
 
   // ── 5. Return the latest cycle that has bills ────────────────────────────

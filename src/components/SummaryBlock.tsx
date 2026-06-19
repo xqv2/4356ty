@@ -8,7 +8,6 @@ import AnimatedAmount from './AnimatedAmount';
 
 export interface SummaryBlockProps {
   totalCents: number;
-  roommateCount: number;
   perPersonCents: number;
 }
 

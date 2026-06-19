@@ -17,21 +17,6 @@ const MONTH_NAMES_LONG = [
   'December',
 ] as const;
 
-const MONTH_NAMES_SHORT = [
-  'JAN',
-  'FEB',
-  'MAR',
-  'APR',
-  'MAY',
-  'JUN',
-  'JUL',
-  'AUG',
-  'SEP',
-  'OCT',
-  'NOV',
-  'DEC',
-] as const;
-
 /** Format integer cents as `$X.XX`. Negative amounts get a leading minus. */
 export function formatMoney(cents: number): string {
   if (!Number.isFinite(cents)) return '$0.00';
@@ -48,12 +33,6 @@ export function formatMoney(cents: number): string {
 export function formatCycleLabel(year: number, month: number): string {
   const idx = clampMonth(month) - 1;
   return `${MONTH_NAMES_LONG[idx]} ${year}`;
-}
-
-/** "APR" — uppercase 3-letter month. */
-export function formatTabLabel(month: number): string {
-  const idx = clampMonth(month) - 1;
-  return MONTH_NAMES_SHORT[idx]!;
 }
 
 /** Long month only — "April". */
