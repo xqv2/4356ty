@@ -90,8 +90,8 @@ export default function ShareView({
         <div className="animal-tag">
           {monthName}&apos;s {animalLabel} {animalEmoji}
         </div>
-        <div className="share-greeting">
-          Hey <b>{roommate.name}</b>! Here&apos;s {monthName}&apos;s split
+        <div className="share-meta">
+          <b>{formatMoney(totalCents)}</b> total · {roommateCount} roommates
         </div>
 
         <div className="share-amount">
@@ -111,10 +111,6 @@ export default function ShareView({
             <b>{formatMoney(savedCents)}</b>
           </div>
         ) : null}
-
-        <div className="share-meta">
-          <b>{formatMoney(totalCents)}</b> total · {roommateCount} roommates
-        </div>
 
         <ShareDetailsToggle bills={bills} pdfUrls={pdfUrls} />
       </div>

@@ -415,22 +415,24 @@ export default function EditorBody({
           </button>
         </div>
 
-        {roommates.map((r) => {
-          const owedCents =
-            computed.perRoommate.find((p) => p.id === r.id)?.cents ?? 0;
-          return (
-            <RoommateRow
-              key={r.id}
-              roommate={r}
-              split={splitForRoommate(r)}
-              computedAmountCents={owedCents}
-              onSave={(patch) => handleRoommateSave(r.id, patch)}
-              onDelete={() => handleRoommateDelete(r.id)}
-              onCopyMessage={() => { handleCopyMessage(r.id); }}
-              isLandlord={r.name.toLowerCase() === 'johny'}
-            />
-          );
-        })}
+        <div className="roommates-grid">
+          {roommates.map((r) => {
+            const owedCents =
+              computed.perRoommate.find((p) => p.id === r.id)?.cents ?? 0;
+            return (
+              <RoommateRow
+                key={r.id}
+                roommate={r}
+                split={splitForRoommate(r)}
+                computedAmountCents={owedCents}
+                onSave={(patch) => handleRoommateSave(r.id, patch)}
+                onDelete={() => handleRoommateDelete(r.id)}
+                onCopyMessage={() => { handleCopyMessage(r.id); }}
+                isLandlord={r.name.toLowerCase() === 'johny'}
+              />
+            );
+          })}
+        </div>
       </div>
     </>
   );

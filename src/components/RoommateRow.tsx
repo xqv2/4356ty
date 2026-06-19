@@ -47,7 +47,7 @@ export default function RoommateRow({
   split,
   computedAmountCents,
   onSave,
-  onDelete,
+  onDelete: _onDelete,
   onCopyMessage,
   isLandlord,
 }: RoommateRowProps) {
@@ -83,8 +83,8 @@ export default function RoommateRow({
   }
 
   return (
-    <div className="roommate-row">
-      <div className="roommate-left">
+    <div className="roommate-card">
+      <div className="roommate-card-head">
         <div className="roommate-avatar">{initialOf(name)}</div>
         <div className="roommate-name-wrap">
           <input
@@ -106,67 +106,56 @@ export default function RoommateRow({
         </div>
       </div>
 
-      <div className="roommate-right">
-        {hasPercent || hasCents ? (
-          <input
-            className="override-input"
-            type="text"
-            inputMode="decimal"
-            value={overrideDraft}
-            onChange={(e) => setOverrideDraft(e.target.value)}
-            onBlur={commitOverride}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') (e.target as HTMLInputElement).blur();
-              if (e.key === 'Escape') {
-                setOverrideDraft(hasCents ? formatCents(split.override_cents as number) : formatCents(computedAmountCents));
-                (e.target as HTMLInputElement).blur();
-              }
-            }}
-            aria-label="Override amount"
-          />
-        ) : (
-          <span className="roommate-amount">{formatCents(computedAmountCents)}</span>
-        )}
+      {hasPercent || hasCents ? (
+        <input
+          className="override-input"
+          type="text"
+          inputMode="decimal"
+          value={overrideDraft}
+          onChange={(e) => setOverrideDraft(e.target.value)}
+          onBlur={commitOverride}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') (e.target as HTMLInputElement).blur();
+            if (e.key === 'Escape') {
+              setOverrideDraft(hasCents ? formatCents(split.override_cents as number) : formatCents(computedAmountCents));
+              (e.target as HTMLInputElement).blur();
+            }
+          }}
+          aria-label="Override amount"
+        />
+      ) : (
+        <div className="roommate-card-amount">{formatCents(computedAmountCents)}</div>
+      )}
 
-        {onCopyMessage && (
-          <button
-            type="button"
-            className={copied ? 'msg-copy-btn copied' : 'msg-copy-btn'}
-            aria-label={copied ? 'Copied' : `Copy message for ${roommate.name}`}
-            onClick={() => {
-              onCopyMessage();
-              setCopied(true);
-              window.setTimeout(() => setCopied(false), 1600);
-            }}
-          >
-            {copied ? (
-              <>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                  <path d="M20 6 9 17l-5-5" />
-                </svg>
-                Copied
-              </>
-            ) : (
-              <>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                  <rect x={9} y={9} width={13} height={13} rx={2} />
-                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
-                </svg>
-                Copy
-              </>
-            )}
-          </button>
-        )}
-
+      {onCopyMessage && (
         <button
           type="button"
-          className="row-delete"
-          onClick={onDelete}
-          aria-label={`Remove ${roommate.name}`}
+          className={copied ? 'msg-copy-btn full copied' : 'msg-copy-btn full'}
+          aria-label={copied ? 'Copied' : `Copy message for ${roommate.name}`}
+          onClick={() => {
+            onCopyMessage();
+            setCopied(true);
+            window.setTimeout(() => setCopied(false), 1600);
+          }}
         >
-          ×
+          {copied ? (
+            <>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M20 6 9 17l-5-5" />
+              </svg>
+              Copied
+            </>
+          ) : (
+            <>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <rect x={9} y={9} width={13} height={13} rx={2} />
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+              </svg>
+              Copy
+            </>
+          )}
         </button>
-      </div>
+      )}
     </div>
   );
 }

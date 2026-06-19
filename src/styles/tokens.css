@@ -344,6 +344,7 @@ h1 {
   display: grid;
   place-items: center;
   flex-shrink: 0;
+  position: relative;
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
 }
@@ -368,14 +369,7 @@ h1 {
 
 .pdf-input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
 
-/* ===== Row containers ====================================================== */
-
-.roommate-right {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-shrink: 0;
-}
+/* ===== Row containers (bill cards) ======================================== */
 
 .row-end {
   display: flex;
@@ -487,26 +481,74 @@ h1 {
 }
 .summary-each.empty { color: var(--muted-soft); }
 
-/* ===== Roommates ========================================================== */
+/* ===== Roommates (card grid) ============================================== */
 
-.roommate-row {
+.roommates-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.roommate-card {
+  background: var(--canvas);
+  border: 1px solid var(--hairline);
+  border-radius: 16px;
+  padding: 14px;
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 14px 0;
-  border-bottom: 1px solid var(--hairline);
-  gap: 12px;
+  flex-direction: column;
+  gap: 10px;
+  transition: border-color 0.15s, box-shadow 0.15s;
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
-}
-.roommate-row:last-of-type { border-bottom: none; }
-
-.roommate-left {
-  display: flex;
-  align-items: center;
-  gap: 10px;
   min-width: 0;
+}
+.roommate-card:hover { border-color: var(--muted-soft); box-shadow: var(--shadow-card); }
+.roommate-card:active { transform: scale(0.98); }
+
+.roommate-card-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  min-width: 0;
+}
+
+.roommate-card .roommate-name-wrap {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3px;
   flex: 1;
+  min-width: 0;
+}
+
+.roommate-card .roommate-name-edit {
+  font-size: 14px;
+  font-weight: 600;
+  max-width: 100%;
+}
+
+.roommate-card-amount {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.8px;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+  line-height: 1;
+}
+
+.roommate-card .override-input {
+  width: 100%;
+  text-align: left;
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.6px;
+}
+
+.msg-copy-btn.full {
+  width: 100%;
+  justify-content: center;
+  border-radius: 10px;
+  height: 36px;
+  margin-top: 2px;
 }
 
 .roommate-avatar {
@@ -1258,9 +1300,9 @@ h1 {
   opacity: 0.7;
 }
 
-/* Roommate row press feel */
-.roommate-row:active .roommate-name-wrap,
-.roommate-row:active .roommate-amount {
+/* Roommate card press feel */
+.roommate-card:active .roommate-name-wrap,
+.roommate-card:active .roommate-card-amount {
   opacity: 0.7;
   transition: opacity 0.08s ease;
 }
