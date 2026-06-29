@@ -80,6 +80,17 @@ export default function RoommateRow({
     onSave({ override_cents: cents, override_percent: null });
   }
 
+  // Small grey footer under the name. Replaces the previous pill chips with
+  // a denser text-only descriptor that reads naturally inside the card.
+  let footerLabel: string | null = null;
+  if (hasPercent) {
+    footerLabel = `${split.override_percent}% discount`;
+  } else if (hasCents) {
+    footerLabel = 'Override';
+  } else if (isLandlord) {
+    footerLabel = 'Landlord';
+  }
+
   return (
     <div className="roommate-card">
       <div className="roommate-card-head">
@@ -98,9 +109,9 @@ export default function RoommateRow({
             }}
             aria-label="Roommate name"
           />
-          {hasPercent && <span className="discount-pill">{`−${split.override_percent}%`}</span>}
-          {hasCents && !hasPercent && <span className="override-pill">override</span>}
-          {!hasPercent && !hasCents && isLandlord && <span className="tag-pill">landlord</span>}
+          {footerLabel && (
+            <div className="roommate-card-footer">{footerLabel}</div>
+          )}
         </div>
       </div>
 

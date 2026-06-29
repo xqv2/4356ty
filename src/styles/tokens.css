@@ -265,17 +265,22 @@ h1 {
 .bill-vendor-edit:focus { color: var(--ink); }
 
 /* Row that holds the provider input + the small ↗ link to the provider's
-   billing page. Link inherits the muted meta color so it disappears into the
-   row instead of competing with the bill name. */
+   billing page. inline-flex so the link sits flush against the end of the
+   provider text instead of being pushed to the right edge of the card. */
 .bill-meta-row {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 6px;
-  width: 100%;
+  gap: 4px;
+  max-width: 100%;
 }
 .bill-meta-row .bill-meta-edit {
-  flex: 1;
+  width: auto;
+  flex: 0 1 auto;
   min-width: 0;
+  /* field-sizing auto-shrinks the input to its content width so the ↗ link
+     hugs the end of the provider name. Supported in Safari 18+, Chrome 123+,
+     Firefox 130+; older browsers fall back to a sane default width. */
+  field-sizing: content;
 }
 .bill-provider-link {
   flex: 0 0 auto;
@@ -283,8 +288,8 @@ h1 {
   line-height: 1;
   color: var(--muted);
   text-decoration: none;
-  padding: 4px 6px;
-  margin: -4px -6px;
+  padding: 2px 4px;
+  margin: -2px -4px;
   border-radius: 4px;
   -webkit-tap-highlight-color: transparent;
 }
@@ -547,10 +552,21 @@ h1 {
 
 .roommate-name-wrap {
   display: flex;
-  align-items: center;
-  gap: 8px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
   min-width: 0;
   flex: 1;
+}
+
+/* Small grey descriptor under the roommate name, replaces the old pills.
+   Examples: "20% discount", "Override", "Landlord". */
+.roommate-card-footer {
+  font-size: 12px;
+  line-height: 1.2;
+  color: var(--muted);
+  font-weight: 400;
+  letter-spacing: 0.01em;
 }
 
 .roommate-name-edit {
