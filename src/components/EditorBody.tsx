@@ -68,19 +68,44 @@ export default function EditorBody({
   const [urlByRoommate, setUrlByRoommate] = useState<Map<string, string>>(new Map());
   const generatingRef = useRef(false);
 
-  // Seed from server-provided active tokens so first copy already has the link.
+  // Seed from server-provided active tokens so first copy already has the
+  // link (preserves iOS user-gesture clipboard write). The seeded URL is the
+  // long origin URL; we immediately fire generateShareLinks in parallel so
+  // that a moment later urlByRoommate is upgraded to the TinyURL-shortened
+  // version. Subsequent copies then use the short URL.
   useEffect(() => {
-    if (activeTokens.length === 0) return;
+    if (demoMode) return;
     const base = window.location.origin;
-    setUrlByRoommate((prev) => {
-      const next = new Map(prev);
-      for (const t of activeTokens) {
-        if (!next.has(t.roommate_id)) {
-          next.set(t.roommate_id, `${base}/share/${t.token}`);
+
+    if (activeTokens.length > 0) {
+      setUrlByRoommate((prev) => {
+        const next = new Map(prev);
+        for (const t of activeTokens) {
+          if (!next.has(t.roommate_id)) {
+            next.set(t.roommate_id, `${base}/share/${t.token}`);
+          }
         }
-      }
-      return next;
-    });
+        return next;
+      });
+    }
+
+    // Background-fetch shortened URLs so the next Copy tap uses tinyurl.com
+    // instead of the long origin URL. Skipped while another fetch is in
+    // flight to avoid spamming the TinyURL quota when this mounts twice.
+    if (generatingRef.current) return;
+    generatingRef.current = true;
+    generateShareLinks(cycle.id)
+      .then((results) => {
+        setUrlByRoommate((prev) => {
+          const next = new Map(prev);
+          for (const r of results) {
+            if (r.url) next.set(r.roommateId, r.url);
+          }
+          return next;
+        });
+      })
+      .catch((e) => console.error('generateShareLinks (mount) failed', e))
+      .finally(() => { generatingRef.current = false; });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
