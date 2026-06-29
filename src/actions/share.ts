@@ -158,6 +158,12 @@ export async function revokeShareLinks(cycleId: UUID): Promise<void> {
 function resolveBaseUrl(): string {
   const explicit = process.env.NEXT_PUBLIC_SITE_URL ?? process.env.NEXT_PUBLIC_APP_URL;
   if (explicit) return explicit.endsWith('/') ? explicit.slice(0, -1) : explicit;
+  // Prefer the stable production domain even when this action runs on a Preview
+  // deployment. Vercel auto-sets VERCEL_PROJECT_PRODUCTION_URL on every build,
+  // so share links always read like `https://274bills.vercel.app/share/XYZ`
+  // instead of the long `bills-<hash>-code-s-projects9.vercel.app` preview URL.
+  const prod = process.env.VERCEL_PROJECT_PRODUCTION_URL;
+  if (prod) return prod.startsWith('http') ? prod : `https://${prod}`;
   const vercel = process.env.VERCEL_URL;
   if (vercel) return vercel.startsWith('http') ? vercel : `https://${vercel}`;
   return 'http://localhost:3000';
