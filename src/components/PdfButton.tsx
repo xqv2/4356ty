@@ -42,24 +42,23 @@ export default function PdfButton({ attached, onUpload, onView }: PdfButtonProps
 
       {/* Overlay the file input directly over the button so iOS Safari receives
           a real touch on the input — programmatic .click() on display:none inputs
-          is silently ignored by iOS Safari. Hidden when a file is already attached. */}
-      {!attached && (
-        <input
-          ref={inputRef}
-          type="file"
-          accept="application/pdf,.pdf,image/png,.png,image/jpeg,.jpg,.jpeg,image/webp,.webp"
-          onChange={handleChange}
-          aria-hidden="true"
-          tabIndex={-1}
-          style={{
-            position: 'absolute',
-            inset: 0,
-            opacity: 0,
-            cursor: 'pointer',
-            fontSize: '16px',
-          }}
-        />
-      )}
+          is silently ignored by iOS Safari. Always rendered (even when a file is
+          already attached) so tapping the icon re-picks / replaces the file. */}
+      <input
+        ref={inputRef}
+        type="file"
+        accept="application/pdf,.pdf,image/png,.png,image/jpeg,.jpg,.jpeg,image/webp,.webp"
+        onChange={handleChange}
+        aria-label={attached ? 'Replace attached file' : 'Attach file'}
+        tabIndex={-1}
+        style={{
+          position: 'absolute',
+          inset: 0,
+          opacity: 0,
+          cursor: 'pointer',
+          fontSize: '16px',
+        }}
+      />
     </div>
   );
 }

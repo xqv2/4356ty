@@ -108,19 +108,6 @@ export default function RoommateRow({
   }
   const footerLabel = [leaseLabel, tagLabel].filter(Boolean).join(' · ') || null;
 
-  const [editingLease, setEditingLease] = useState(false);
-  function commitLease(value: string) {
-    setEditingLease(false);
-    const trimmed = value.trim();
-    if (trimmed === '') {
-      if (roommate.lease_end_date !== null) onSave({ lease_end_date: null });
-      return;
-    }
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) return;
-    if (trimmed === roommate.lease_end_date) return;
-    onSave({ lease_end_date: trimmed });
-  }
-
   return (
     <div className="roommate-card">
       <div className="roommate-card-head">
@@ -139,33 +126,8 @@ export default function RoommateRow({
             }}
             aria-label="Roommate name"
           />
-          {editingLease ? (
-            <input
-              className="roommate-card-footer roommate-lease-input"
-              type="date"
-              autoFocus
-              defaultValue={roommate.lease_end_date ?? ''}
-              onBlur={(e) => commitLease(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') (e.target as HTMLInputElement).blur();
-                if (e.key === 'Escape') { setEditingLease(false); }
-              }}
-              aria-label="Lease end date"
-            />
-          ) : (
-            <button
-              type="button"
-              className={
-                footerLabel
-                  ? 'roommate-card-footer roommate-lease-btn'
-                  : 'roommate-card-footer roommate-lease-btn roommate-lease-empty'
-              }
-              onClick={() => setEditingLease(true)}
-              aria-label={leaseLabel ? `Edit lease end date (${leaseLabel})` : 'Set lease end date'}
-              title="Tap to set lease end date"
-            >
-              {footerLabel ?? '+ lease end'}
-            </button>
+          {footerLabel && (
+            <div className="roommate-card-footer">{footerLabel}</div>
           )}
         </div>
       </div>
