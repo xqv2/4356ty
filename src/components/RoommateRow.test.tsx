@@ -16,6 +16,7 @@ const ROOMMATE: Roommate = {
   name: 'Alice',
   position: 0,
   archived_at: null,
+  lease_end_date: null,
   created_at: '2026-01-01T00:00:00.000Z',
 };
 

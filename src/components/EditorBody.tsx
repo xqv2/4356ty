@@ -323,6 +323,7 @@ export default function EditorBody({
       name: name.trim(),
       position: roommates.length,
       archived_at: null,
+    lease_end_date: null,
       created_at: new Date().toISOString(),
     };
     setRoommates((prev) => [...prev, optimistic]);

@@ -10,6 +10,8 @@ import { POOL } from '@/lib/animals';
 export interface RoommatePatch {
   name?: string;
   position?: number;
+  /** ISO date (YYYY-MM-DD) or null to clear. Anything else is rejected. */
+  lease_end_date?: string | null;
 }
 
 export async function saveRoommate(
@@ -20,6 +22,13 @@ export async function saveRoommate(
   const update: Record<string, unknown> = {};
   if (typeof patch.name === 'string') update.name = patch.name.trim();
   if (typeof patch.position === 'number') update.position = Math.max(0, Math.trunc(patch.position));
+  if (patch.lease_end_date !== undefined) {
+    if (patch.lease_end_date === null) {
+      update.lease_end_date = null;
+    } else if (/^\d{4}-\d{2}-\d{2}$/.test(patch.lease_end_date)) {
+      update.lease_end_date = patch.lease_end_date;
+    }
+  }
 
   if (Object.keys(update).length === 0) {
     const { data, error } = await supabase.from('roommates').select('*').eq('id', roommateId).single();

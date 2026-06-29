@@ -7,6 +7,7 @@ export interface RoommateRowPatch {
   name?: string;
   override_cents?: number | null;
   override_percent?: number | null;
+  lease_end_date?: string | null;
 }
 
 export interface RoommateRowProps {
@@ -39,6 +40,19 @@ function parseCents(raw: string): number | null {
   const num = Number(cleaned);
   if (!Number.isFinite(num)) return null;
   return Math.round(num * 100);
+}
+
+/** Format an ISO date (YYYY-MM-DD) as "MMM YYYY" for the card footer. */
+function formatLeaseEnd(iso: string | null): string | null {
+  if (!iso) return null;
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso);
+  if (!m) return null;
+  const year = Number(m[1]);
+  const month = Number(m[2]) - 1;
+  const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const name = MONTHS[month];
+  if (!name || !Number.isFinite(year)) return null;
+  return `${name} ${year}`;
 }
 
 export default function RoommateRow({
@@ -80,15 +94,31 @@ export default function RoommateRow({
     onSave({ override_cents: cents, override_percent: null });
   }
 
-  // Small grey footer under the name. Replaces the previous pill chips with
-  // a denser text-only descriptor that reads naturally inside the card.
-  let footerLabel: string | null = null;
+  // Small grey footer under the name. Combines the lease-end date with the
+  // override / discount / landlord tag so the card reads as one line, e.g.
+  // "Aug 2026 · 20% discount", "Dec 2026", "Landlord".
+  const leaseLabel = formatLeaseEnd(roommate.lease_end_date);
+  let tagLabel: string | null = null;
   if (hasPercent) {
-    footerLabel = `${split.override_percent}% discount`;
+    tagLabel = `${split.override_percent}% discount`;
   } else if (hasCents) {
-    footerLabel = 'Override';
+    tagLabel = 'Override';
   } else if (isLandlord) {
-    footerLabel = 'Landlord';
+    tagLabel = 'Landlord';
+  }
+  const footerLabel = [leaseLabel, tagLabel].filter(Boolean).join(' · ') || null;
+
+  const [editingLease, setEditingLease] = useState(false);
+  function commitLease(value: string) {
+    setEditingLease(false);
+    const trimmed = value.trim();
+    if (trimmed === '') {
+      if (roommate.lease_end_date !== null) onSave({ lease_end_date: null });
+      return;
+    }
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) return;
+    if (trimmed === roommate.lease_end_date) return;
+    onSave({ lease_end_date: trimmed });
   }
 
   return (
@@ -109,8 +139,33 @@ export default function RoommateRow({
             }}
             aria-label="Roommate name"
           />
-          {footerLabel && (
-            <div className="roommate-card-footer">{footerLabel}</div>
+          {editingLease ? (
+            <input
+              className="roommate-card-footer roommate-lease-input"
+              type="date"
+              autoFocus
+              defaultValue={roommate.lease_end_date ?? ''}
+              onBlur={(e) => commitLease(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') (e.target as HTMLInputElement).blur();
+                if (e.key === 'Escape') { setEditingLease(false); }
+              }}
+              aria-label="Lease end date"
+            />
+          ) : (
+            <button
+              type="button"
+              className={
+                footerLabel
+                  ? 'roommate-card-footer roommate-lease-btn'
+                  : 'roommate-card-footer roommate-lease-btn roommate-lease-empty'
+              }
+              onClick={() => setEditingLease(true)}
+              aria-label={leaseLabel ? `Edit lease end date (${leaseLabel})` : 'Set lease end date'}
+              title="Tap to set lease end date"
+            >
+              {footerLabel ?? '+ lease end'}
+            </button>
           )}
         </div>
       </div>

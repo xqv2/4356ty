@@ -65,6 +65,8 @@ export interface Roommate {
   user_id: UUID;
   name: string;
   position: number;
+  /** ISO date (YYYY-MM-DD) when the roommate's lease ends, or null. */
+  lease_end_date: string | null;
   archived_at: string | null;
   created_at: string;
 }

@@ -90,6 +90,7 @@ const DEMO_ROOMMATES: Roommate[] = [
     name: 'Astitva',
     position: 0,
     archived_at: null,
+    lease_end_date: null,
     created_at: '2026-04-01T00:00:00.000Z',
   },
   {
@@ -98,6 +99,7 @@ const DEMO_ROOMMATES: Roommate[] = [
     name: 'Bob',
     position: 1,
     archived_at: null,
+    lease_end_date: null,
     created_at: '2026-04-01T00:00:00.000Z',
   },
   {
@@ -106,6 +108,7 @@ const DEMO_ROOMMATES: Roommate[] = [
     name: 'Johny (landlord)',
     position: 2,
     archived_at: null,
+    lease_end_date: null,
     created_at: '2026-04-01T00:00:00.000Z',
   },
   {
@@ -114,6 +117,7 @@ const DEMO_ROOMMATES: Roommate[] = [
     name: 'Lokesh',
     position: 3,
     archived_at: null,
+    lease_end_date: null,
     created_at: '2026-04-01T00:00:00.000Z',
   },
 ];

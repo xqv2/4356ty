@@ -560,13 +560,49 @@ h1 {
 }
 
 /* Small grey descriptor under the roommate name, replaces the old pills.
-   Examples: "20% discount", "Override", "Landlord". */
+   Examples: "Aug 2026 · 20% discount", "Dec 2026", "Landlord". */
 .roommate-card-footer {
   font-size: 12px;
   line-height: 1.2;
   color: var(--muted);
   font-weight: 400;
   letter-spacing: 0.01em;
+}
+/* Tap-to-edit lease-end footer rendered as a button. Visually inert. */
+.roommate-lease-btn {
+  background: none;
+  border: none;
+  padding: 2px 4px;
+  margin: -2px -4px;
+  border-radius: 4px;
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  -webkit-tap-highlight-color: transparent;
+}
+.roommate-lease-btn:hover,
+.roommate-lease-btn:focus-visible {
+  color: var(--ink);
+  background: rgba(0, 0, 0, 0.04);
+  outline: none;
+}
+.roommate-lease-empty {
+  opacity: 0.6;
+}
+.roommate-card:hover .roommate-lease-empty {
+  opacity: 1;
+}
+.roommate-lease-input {
+  background: transparent;
+  border: none;
+  outline: none;
+  padding: 2px 4px;
+  margin: -2px -4px;
+  font-family: var(--sans);
+  color: var(--ink);
+  /* Prevent iOS zoom-on-focus for type=date by keeping font-size >= 16px in
+     mobile breakpoints — the inherited 12px is fine on desktop. */
 }
 
 .roommate-name-edit {
