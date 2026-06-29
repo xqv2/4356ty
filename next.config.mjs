@@ -10,6 +10,14 @@ const supabaseHostname = (() => {
 
 const nextConfig = {
   reactStrictMode: true,
+  // Server Actions cap request bodies at 1MB by default; bills include real
+  // utility PDFs that routinely exceed that. 10MB covers every provider PDF
+  // we've seen without inviting abuse.
+  experimental: {
+    serverActions: {
+      bodySizeLimit: '10mb',
+    },
+  },
   images: {
     remotePatterns: supabaseHostname
       ? [
