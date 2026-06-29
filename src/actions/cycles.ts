@@ -282,11 +282,14 @@ export async function createNextCycle(): Promise<void> {
 
   // Carry bills from prior cycle. Amounts are carried forward as estimates
   // so trash/internet stay at their fixed price and electricity/water give
-  // a starting point the user can edit when the real bill arrives.
+  // a starting point the user can edit when the real bill arrives. Trash
+  // additionally inherits the prior pdf_path because that bill arrives
+  // quarterly — the same PDF is valid for the next two months until the user
+  // explicitly replaces it.
   if (latest && latest.length > 0) {
     const { data: priorBills } = await supabase
       .from('bills')
-      .select('vendor, provider, kind, recurring, position, amount_cents')
+      .select('vendor, provider, kind, recurring, position, amount_cents, pdf_path')
       .eq('cycle_id', (latest[0] as Cycle).id)
       .order('position', { ascending: true });
 
@@ -297,6 +300,7 @@ export async function createNextCycle(): Promise<void> {
           kind: b.kind ?? null, recurring: b.recurring ?? false,
           amount_cents: typeof b.amount_cents === 'number' ? b.amount_cents : 0,
           position: typeof b.position === 'number' ? b.position : i,
+          pdf_path: b.kind === 'trash' && typeof b.pdf_path === 'string' ? b.pdf_path : null,
         })),
       );
     }
