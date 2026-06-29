@@ -31,8 +31,8 @@ const KNOWN_KINDS: ReadonlyArray<BillKind> = [
  *  kind not listed here (e.g. `custom`) get no link. */
 const BILLING_URL_BY_KIND: Partial<Record<BillKind, string>> = {
   electricity: 'https://m.pge.com/#login',
-  water: 'https://myaccount.sfpuc.org/',
-  trash: 'https://www.recology.com/recology-san-francisco/',
+  water: 'https://myaccount-water.sfpuc.org/',
+  trash: 'https://secure8.i-doxs.net/Recology/SignIn.aspx',
   internet: 'https://members.sonic.net/',
 };
 
