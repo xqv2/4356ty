@@ -239,7 +239,12 @@ export default function EditorBody({
           prev.map((b) => (b.id === billId ? updated : b)),
         );
       } catch (e) {
+        const msg = e instanceof Error ? e.message : String(e);
         console.error('attachPdf failed', e);
+        // Surface the failure so the user knows why nothing happened. Without
+        // this an upload error (wrong storage bucket, RLS, 5MB limit, etc.)
+        // silently dropped the PDF and the UI looked unchanged.
+        window.alert(`Could not attach PDF: ${msg}`);
       }
     });
   }
