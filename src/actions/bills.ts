@@ -105,17 +105,23 @@ export async function attachPdf(billId: UUID, file: File): Promise<Bill> {
     .eq('id', billId)
     .single();
 
-  if (lookupErr || !bill) throw new Error(lookupErr?.message ?? 'Bill not found');
+  if (lookupErr || !bill) {
+    throw new Error(`attachPdf: bill lookup failed (${lookupErr?.message ?? 'not found'})`);
+  }
 
   // Use the cycle's user_id for the storage path to stay consistent with
   // existing stored files.
-  const { data: cycleRow } = await supabase
+  const { data: cycleRow, error: cycleErr } = await supabase
     .from('cycles')
     .select('user_id')
     .eq('id', bill.cycle_id)
     .single();
 
-  const ownerId = cycleRow?.user_id ?? 'unknown';
+  if (cycleErr || !cycleRow) {
+    throw new Error(`attachPdf: cycle lookup failed (${cycleErr?.message ?? 'not found'})`);
+  }
+
+  const ownerId = cycleRow.user_id;
   const ext = file.name.includes('.') ? file.name.slice(file.name.lastIndexOf('.')) : '';
   const path = `${ownerId}/${bill.cycle_id}/${bill.id}${ext}`;
   const arrayBuffer = await file.arrayBuffer();
@@ -124,7 +130,9 @@ export async function attachPdf(billId: UUID, file: File): Promise<Bill> {
     .from('bills')
     .upload(path, arrayBuffer, { contentType: file.type || 'application/pdf', upsert: true });
 
-  if (uploadErr) throw new Error(uploadErr.message);
+  if (uploadErr) {
+    throw new Error(`attachPdf: storage upload failed (${uploadErr.message})`);
+  }
 
   const { data: updated, error: updateErr } = await supabase
     .from('bills')
@@ -133,7 +141,9 @@ export async function attachPdf(billId: UUID, file: File): Promise<Bill> {
     .select('*')
     .single();
 
-  if (updateErr || !updated) throw new Error(updateErr?.message ?? 'Failed to record pdf_path');
+  if (updateErr || !updated) {
+    throw new Error(`attachPdf: pdf_path update failed (${updateErr?.message ?? 'no row returned'})`);
+  }
 
   revalidatePath(`/cycle/${updated.cycle_id}`);
   return updated as Bill;
