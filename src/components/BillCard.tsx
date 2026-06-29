@@ -26,6 +26,16 @@ const KNOWN_KINDS: ReadonlyArray<BillKind> = [
   'internet',
 ];
 
+/** Provider billing portal per kind. Used by the small ↗ link beside the
+ *  provider name; tapping it opens the portal in a new tab. Bills with a
+ *  kind not listed here (e.g. `custom`) get no link. */
+const BILLING_URL_BY_KIND: Partial<Record<BillKind, string>> = {
+  electricity: 'https://m.pge.com/#login',
+  water: 'https://myaccount.sfpuc.org/',
+  trash: 'https://www.recology.com/recology-san-francisco/',
+  internet: 'https://members.sonic.net/',
+};
+
 const DEBOUNCE_MS = 400;
 
 /** Pick the icon path for a bill kind; fall back to a generic icon. */
@@ -187,15 +197,30 @@ export default function BillCard({
           placeholder="Vendor"
           aria-label="Vendor"
         />
-        <input
-          className="bill-meta-edit"
-          type="text"
-          value={provider}
-          onChange={handleProviderChange}
-          onBlur={handleProviderBlur}
-          placeholder="Provider"
-          aria-label="Provider"
-        />
+        <div className="bill-meta-row">
+          <input
+            className="bill-meta-edit"
+            type="text"
+            value={provider}
+            onChange={handleProviderChange}
+            onBlur={handleProviderBlur}
+            placeholder="Provider"
+            aria-label="Provider"
+          />
+          {bill.kind && BILLING_URL_BY_KIND[bill.kind] && (
+            <a
+              className="bill-provider-link"
+              href={BILLING_URL_BY_KIND[bill.kind]}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={`Open ${provider || bill.kind} billing page`}
+              title={`Open ${provider || bill.kind} billing page`}
+              onClick={(e) => e.stopPropagation()}
+            >
+              ↗
+            </a>
+          )}
+        </div>
       </div>
       <div className="row-end">
         <PdfButton attached={Boolean(bill.pdf_path)} onUpload={onAttachPdf} />

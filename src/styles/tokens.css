@@ -264,6 +264,37 @@ h1 {
 .bill-meta-edit:focus,
 .bill-vendor-edit:focus { color: var(--ink); }
 
+/* Row that holds the provider input + the small ↗ link to the provider's
+   billing page. Link inherits the muted meta color so it disappears into the
+   row instead of competing with the bill name. */
+.bill-meta-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+}
+.bill-meta-row .bill-meta-edit {
+  flex: 1;
+  min-width: 0;
+}
+.bill-provider-link {
+  flex: 0 0 auto;
+  font-size: 13px;
+  line-height: 1;
+  color: var(--muted);
+  text-decoration: none;
+  padding: 4px 6px;
+  margin: -4px -6px;
+  border-radius: 4px;
+  -webkit-tap-highlight-color: transparent;
+}
+.bill-provider-link:hover,
+.bill-provider-link:focus-visible {
+  color: var(--ink);
+  background: rgba(0, 0, 0, 0.04);
+  outline: none;
+}
+
 .bill-amount-input {
   font-size: 15px;
   font-weight: 600;
